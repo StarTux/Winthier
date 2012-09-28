@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -rvf target/ Winthier.jar
+rm -vf files libs

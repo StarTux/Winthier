@@ -1,0 +1,17 @@
+components:
+  password:
+    FromGroup: guest
+    ToGroup: member
+    PasswordLength: 5
+  rules:
+    Rules:
+    - '&7* &cRULES&7 *'
+    - '&c* &7No &cgriefing&7, &cstealing&7 or &cspamming&7.'
+    - '&c* &7Do not &cexploit glitches&7 or use &cunfair client mods&7.'
+    - '&c* &7No &cwhining&7 or &coffensive language&7. Be respectful.'
+    - '&c* &7No &cugly&7 or &coffensive&7 builds or &c1x1&7 towers.'
+    - '&c* &7Use &ccommon sense&7 and do not create unreasonable &clag&7.'
+    PasswordLine: '&c* &7Become member via &c/pw $password&7.'
+  motd:
+    Message:
+    - '&3Welcome to &bWinnilla&3 - Winthier semi vanilla MC server'

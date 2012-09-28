@@ -1,0 +1,37 @@
+name: Winthier
+main: com.winthier.WinthierPlugin
+version: 0.1
+author: StarTux
+description: The Winthier Plugin
+depends: [ Vault ]
+commands:
+  pw:
+    description: Become a member
+    usage: /<command> <password>
+    permission: winthier.cmd.pw
+  winthier:
+    description: General purpose command
+    usage: /<command> <cmd>
+    permission: winthier.cmd.winthier
+  rules:
+    description: Display server rules
+    usage: /<command>
+    permission: winthier.cmd.rules
+permissions:
+  winthier.cmd.pw:
+    description: Use the /pw command to become a member
+    default: false
+  winthier.cmd.wintier:
+    description: Use the /winthier command
+    default: op
+  winthier.cmd.rules:
+    description: Use the /rules command
+    default: op
+  winthier.password.notify:
+    description: Get notified when a user gets promoted after entering the correct password.
+  winthier.joinleavemsg:
+    description: Display a message when the player joins or leaves
+    default: op
+  winthier.cheatmods:
+    description: Permit the use of cheaty clientmods
+    default: op
