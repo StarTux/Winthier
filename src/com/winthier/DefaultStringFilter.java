@@ -21,7 +21,6 @@ package com.winthier;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.bukkit.ChatColor;
 
 public class DefaultStringFilter extends StringFilter {
         private static class EscapeReplacer implements StringReplacer {
@@ -35,22 +34,9 @@ public class DefaultStringFilter extends StringFilter {
                         return new StringFilter.Constant(matcher.group(1));
                 }
         }
-        private static class ColorReplacer implements StringReplacer {
-                public static Pattern pattern = Pattern.compile("&([0-9a-f])");
-                @Override
-                public Pattern getPattern() {
-                        return pattern;
-                }
-                @Override
-                public Object getReplacement(Matcher matcher) {
-                        return new StringFilter.Constant(ChatColor.getByChar(matcher.group(1)).toString());
-                }
-        }
         public static final EscapeReplacer ESCAPE_REPLACER = new EscapeReplacer();
-        public static final ColorReplacer COLOR_REPLACER = new ColorReplacer();
 
         public DefaultStringFilter() {
                 addReplacer(ESCAPE_REPLACER);
-                addReplacer(COLOR_REPLACER);
         }
 }

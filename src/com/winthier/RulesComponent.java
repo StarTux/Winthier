@@ -44,7 +44,7 @@ public class RulesComponent extends AbstractComponent implements CommandExecutor
         @Override
         public void loadConfiguration() {
                 rules.clear();
-                StringFilter filter = new DefaultStringFilter();
+                StringFilter filter = new ColorStringFilter();
                 for (String line : getConfig().getStringList("Rules")) {
                         rules.add(filter.replace(line));
                 }
@@ -52,7 +52,7 @@ public class RulesComponent extends AbstractComponent implements CommandExecutor
         }
 
         public String getPasswordLine(Player player) {
-                StringFilter filter = new DefaultStringFilter();
+                StringFilter filter = new ColorStringFilter();
                 filter.addReplacer(new FixedStringReplacer("$password", PasswordComponent.getInstance().getPassword(player.getName())));
                 return filter.replace(passwordLine);
         }

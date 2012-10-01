@@ -34,7 +34,7 @@ public class MotdComponent extends AbstractComponent implements Listener {
 
         @Override
         public void loadConfiguration() {
-                StringFilter filter = new DefaultStringFilter();
+                StringFilter filter = new ColorStringFilter();
                 motd = filter.replace(getConfig().getStringList("Message"));
         }
 

@@ -48,6 +48,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new PasswordComponent(this));
                 components.add(new RulesComponent(this));
                 components.add(new MotdComponent(this));
+                components.add(new SignColorComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();
@@ -78,8 +79,14 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
-                sender.sendMessage("Password: " + PasswordComponent.getInstance().getPassword(args[0]));
-                return true;
+                if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
+                        reloadConfig();
+                        for (Component component : components) {
+                                component.reloadConfiguration();
+                        }
+                        return true;
+                }
+                return false;
         }
 
         @EventHandler(priority = EventPriority.MONITOR)

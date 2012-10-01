@@ -11,7 +11,7 @@ commands:
     permission: winthier.cmd.pw
   winthier:
     description: General purpose command
-    usage: /<command> <cmd>
+    usage: /<command> help
     permission: winthier.cmd.winthier
   rules:
     description: Display server rules
@@ -30,8 +30,38 @@ permissions:
   winthier.password.notify:
     description: Get notified when a user gets promoted after entering the correct password.
   winthier.joinleavemsg:
-    description: Display a message when the player joins or leaves
+    description: Display a message when the player joins or leaves.
     default: op
   winthier.cheatmods:
-    description: Permit the use of cheaty clientmods
+    description: Permit the use of cheaty clientmods.
     default: op
+  winthier.signcolor.allcolors:
+    description: Permit the use of all color codes on signs.
+    default: op
+    children:
+    - winthier.signcolor.0
+    - winthier.signcolor.1
+    - winthier.signcolor.2
+    - winthier.signcolor.3
+    - winthier.signcolor.4
+    - winthier.signcolor.5
+    - winthier.signcolor.6
+    - winthier.signcolor.7
+    - winthier.signcolor.8
+    - winthier.signcolor.9
+    - winthier.signcolor.a
+    - winthier.signcolor.b
+    - winthier.signcolor.c
+    - winthier.signcolor.d
+    - winthier.signcolor.e
+    - winthier.signcolor.f
+  winthier.signcolor.allformats:
+    description: Permit the use of all formatting codes on signs.
+    default: op
+    children:
+    - winthier.signcolor.k
+    - winthier.signcolor.l
+    - winthier.signcolor.m
+    - winthier.signcolor.n
+    - winthier.signcolor.o
+    - winthier.signcolor.r
