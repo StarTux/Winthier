@@ -15,3 +15,9 @@ components:
   motd:
     Message:
     - '&3Welcome to &bWinnilla&3 - Winthier semi vanilla MC server'
+  message:
+    help:
+      ErrorMessage: '&4Unknown help section'
+      Message:
+      - '&3Help Screen'
+      - '&7This is the default &bHelp&7 screen provided by the Winthier plugin.'

@@ -49,6 +49,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new RulesComponent(this));
                 components.add(new MotdComponent(this));
                 components.add(new SignColorComponent(this));
+                components.add(new MessageComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();
