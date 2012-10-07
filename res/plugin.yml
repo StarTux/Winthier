@@ -17,6 +17,10 @@ commands:
     description: Display server rules
     usage: /<command>
     permission: winthier.cmd.rules
+  ignore:
+    description: Ignore another player in chat
+    usage: /<command> <player>
+    permission: winthier.cmd.ignore
 permissions:
   winthier.cmd.pw:
     description: Use the /pw command to become a member

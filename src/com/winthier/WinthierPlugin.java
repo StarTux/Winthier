@@ -50,6 +50,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new MotdComponent(this));
                 components.add(new SignColorComponent(this));
                 components.add(new MessageComponent(this));
+                components.add(new IgnoreComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();
@@ -85,6 +86,14 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         for (Component component : components) {
                                 component.reloadConfiguration();
                         }
+                        sender.sendMessage("Configuration reloaded");
+                        return true;
+                }
+                if (args.length == 1 && args[0].equalsIgnoreCase("save")) {
+                        for (Component component : components) {
+                                component.saveConfiguration();
+                        }
+                        sender.sendMessage("Configuration saved");
                         return true;
                 }
                 return false;
