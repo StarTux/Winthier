@@ -36,6 +36,9 @@ permissions:
   winthier.joinleavemsg:
     description: Display a message when the player joins or leaves.
     default: op
+  winthier.deathmessage.visible:
+    description: Send a message upon player death
+    default: false
   winthier.cheatmods:
     description: Permit the use of cheaty clientmods.
     default: op

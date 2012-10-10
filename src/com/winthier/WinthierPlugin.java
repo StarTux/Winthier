@@ -30,7 +30,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -51,6 +50,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new SignColorComponent(this));
                 components.add(new MessageComponent(this));
                 components.add(new IgnoreComponent(this));
+                components.add(new DeathMessageComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();
@@ -157,15 +157,6 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         event.setLeaveMessage("");
                 } else {
                         event.setLeaveMessage(ChatColor.DARK_GRAY.toString() + event.getPlayer().getName() + " left");
-                }
-        }
-
-        @EventHandler(priority = EventPriority.LOWEST)
-        public void onPlayerDeath(PlayerDeathEvent event) {
-                if (!event.getEntity().hasPermission("winthier.deathmsg")) {
-                        event.setDeathMessage("");
-                } else {
-                        event.setDeathMessage(ChatColor.DARK_GRAY.toString() + event.getDeathMessage());
                 }
         }
 }

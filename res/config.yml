@@ -21,3 +21,5 @@ components:
       Message:
       - '&3Help Screen'
       - '&7This is the default &bHelp&7 screen provided by the Winthier plugin.'
+  deathmessage:
+    Color: '8'

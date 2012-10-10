@@ -22,6 +22,7 @@ package com.winthier;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -41,9 +42,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class IgnoreComponent extends AbstractComponent implements CommandExecutor, Listener {
+        private static IgnoreComponent instance;
         private Map<String, Set<String>> ignoreLists = new LinkedHashMap<String, Set<String>>();
+
         public IgnoreComponent(WinthierPlugin plugin) {
                 super(plugin, "ignore");
+                instance = this;
         }
 
         @Override
@@ -60,8 +64,8 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                 }
                 Player ignorer = (Player)sender;
                 if (args.length == 0) {
-                        String[] ignorees = getIgnoreList(ignorer.getName());
-                        if (ignorees.length == 0) {
+                        Set<String> ignorees = getIgnoreList(ignorer.getName());
+                        if (ignorees.size() == 0) {
                                 sender.sendMessage("You are not ignoring anyone.");
                         } else {
                                 StringBuilder sb = new StringBuilder("Ignored players:");
@@ -155,14 +159,10 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
         public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
-                Player speaker = event.getPlayer();
-                for (Iterator<Player> it = event.getRecipients().iterator(); it.hasNext(); ) {
-                        Player recipient = it.next();
-                        if (doesIgnore(recipient.getName(), speaker.getName())) it.remove();
-                }
+                filterRecipients(event.getPlayer().getName(), event.getRecipients());
         }
 
-        private synchronized void setIgnore(String ignorer, String ignoree, boolean ignore) {
+        public synchronized void setIgnore(String ignorer, String ignoree, boolean ignore) {
                 Set<String> ignoreList = ignoreLists.get(ignorer);
                 if (ignoreList == null) {
                         if (!ignore) return;
@@ -177,21 +177,36 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                 }
         }
 
-        private synchronized boolean doesIgnore(String ignorer, String ignoree) {
+        public synchronized boolean doesIgnore(String ignorer, String ignoree) {
                 Set<String> ignoreList = ignoreLists.get(ignorer);
                 if (ignoreList == null) return false;
                 return ignoreList.contains(ignoree);
         }
 
-        private synchronized boolean toggleIgnore(String ignorer, String ignoree) {
+        public synchronized boolean toggleIgnore(String ignorer, String ignoree) {
                 boolean ignore = !doesIgnore(ignorer, ignoree);
                 setIgnore(ignorer, ignoree, ignore);
                 return ignore;
         }
 
-        private synchronized String[] getIgnoreList(String ignorer) {
+        public synchronized void filterRecipients(String ignoree, Collection<Player> recipients) {
+                for (Iterator<Player> it = recipients.iterator(); it.hasNext(); ) {
+                        String ignorer = it.next().getName();
+                        Set<String> ignoreList = ignoreLists.get(ignorer);
+                        if (ignoreList == null) continue;
+                        if (ignoreList.contains(ignoree)) {
+                                it.remove();
+                        }
+                }
+        }
+
+        public synchronized Set<String> getIgnoreList(String ignorer) {
                 Set<String> ignoreList = ignoreLists.get(ignorer);
-                if (ignoreList == null) return new String[0];
-                return ignoreList.toArray(new String[0]);
+                if (ignoreList == null) return new LinkedHashSet<String>();
+                return new LinkedHashSet<String>(ignoreList);
+        }
+
+        public static IgnoreComponent getInstance() {
+                return instance;
         }
 }
