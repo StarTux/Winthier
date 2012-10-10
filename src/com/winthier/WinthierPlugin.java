@@ -91,6 +91,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         for (Component component : components) {
                                 component.saveConfiguration();
                         }
+                        getConfig().options().copyDefaults(true);
                         saveConfig();
                         sender.sendMessage("Configuration saved");
                         return true;

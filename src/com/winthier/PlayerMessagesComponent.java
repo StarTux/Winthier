@@ -60,7 +60,7 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
                 getPlugin().getLogger().info(msg);
                 event.setDeathMessage("");
                 if (event.getEntity().hasPermission("winthier.playermessages.death")) {
-                        IgnoreComponent.getInstance().broadcast(event.getEntity(), deathMsgColor + msg);
+                        IgnoreComponent.getInstance().broadcast(event.getEntity(), deathMsgColor + msg, false);
                 }
         }
 
@@ -69,7 +69,7 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
                 event.setJoinMessage("");
                 if (event.getPlayer().hasPermission("winthier.playermessages.join")) {
                         variables.setVariable("player", event.getPlayer().getName());
-                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(joinMsg));
+                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(joinMsg), true);
                 }
         }
 
@@ -78,7 +78,7 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
                         event.setQuitMessage("");
                 if (event.getPlayer().hasPermission("winthier.playermessages.leave")) {
                         variables.setVariable("player", event.getPlayer().getName());
-                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(leaveMsg));
+                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(leaveMsg), true);
                 }
         }
 
@@ -87,7 +87,7 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
                 event.setLeaveMessage("");
                 if (event.getPlayer().hasPermission("winthier.playermessages.leave")) {
                         variables.setVariable("player", event.getPlayer().getName());
-                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(leaveMsg));
+                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(leaveMsg), true);
                 }
         }
 }
