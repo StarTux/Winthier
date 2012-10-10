@@ -21,5 +21,7 @@ components:
       Message:
       - '&3Help Screen'
       - '&7This is the default &bHelp&7 screen provided by the Winthier plugin.'
-  deathmessage:
-    Color: '8'
+  playermessages:
+    DeathMessageColor: '8'
+    JoinMessage: '&1{player} joined teh game'
+    LeaveMessage: '&1$player left teh game'

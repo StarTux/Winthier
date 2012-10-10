@@ -46,7 +46,7 @@ public class StringFilter {
                 replacers.add(replacer);
         }
 
-        public List<Object> filter (String input) {
+        public List<Object> filter(String input) {
                 List<Object> tokens = new LinkedList<Object>();
                 tokens.add(input);
                 for (StringReplacer replacer : replacers) {
@@ -73,12 +73,16 @@ public class StringFilter {
                 return tokens;
         }
 
-        public String replace(String input) {
+        public static String build(List<Object> input) {
                 StringBuilder builder = new StringBuilder();
-                for (Object o : filter(input)) {
+                for (Object o : input) {
                         builder.append(o.toString());
                 }
                 return builder.toString();
+        }
+
+        public String replace(String input) {
+                return build(filter(input));
         }
 
         public List<String> replace(List<String> input) {

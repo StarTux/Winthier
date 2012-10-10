@@ -31,8 +31,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -50,7 +48,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new SignColorComponent(this));
                 components.add(new MessageComponent(this));
                 components.add(new IgnoreComponent(this));
-                components.add(new DeathMessageComponent(this));
+                components.add(new PlayerMessagesComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();
@@ -93,6 +91,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         for (Component component : components) {
                                 component.saveConfiguration();
                         }
+                        saveConfig();
                         sender.sendMessage("Configuration saved");
                         return true;
                 }
@@ -101,11 +100,6 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerJoin(PlayerJoinEvent event) {
-                if (!event.getPlayer().hasPermission("winthier.joinleavemsg")) {
-                        event.setJoinMessage("");
-                } else {
-                        event.setJoinMessage(ChatColor.DARK_GRAY.toString() + event.getPlayer().getName() + " joined");
-                }
                 if (!event.getPlayer().hasPermission("winthier.cheatmods")) {
                         String message = "";
                         // Disable Zombe's fly mod.
@@ -139,24 +133,6 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         // Disable Smart Moving's climbing.
                         message += "§0§1§7§f§f";
                         event.getPlayer().sendMessage(message);
-                }
-        }
-
-        @EventHandler(priority = EventPriority.LOWEST)
-        public void onPlayerQuit(PlayerQuitEvent event) {
-                if (!event.getPlayer().hasPermission("winthier.joinleavemsg")) {
-                        event.setQuitMessage("");
-                } else {
-                        event.setQuitMessage(ChatColor.DARK_GRAY.toString() + event.getPlayer().getName() + " left");
-                }
-        }
-
-        @EventHandler(priority = EventPriority.LOWEST)
-        public void onPlayerKick(PlayerKickEvent event) {
-                if (!event.getPlayer().hasPermission("winthier.joinleavemsg")) {
-                        event.setLeaveMessage("");
-                } else {
-                        event.setLeaveMessage(ChatColor.DARK_GRAY.toString() + event.getPlayer().getName() + " left");
                 }
         }
 }

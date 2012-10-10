@@ -22,10 +22,13 @@ package com.winthier;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.ChatColor;
@@ -202,8 +205,20 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
 
         public synchronized Set<String> getIgnoreList(String ignorer) {
                 Set<String> ignoreList = ignoreLists.get(ignorer);
-                if (ignoreList == null) return new LinkedHashSet<String>();
+                if (ignoreList == null) return new HashSet<String>();
                 return new LinkedHashSet<String>(ignoreList);
+        }
+
+        public void broadcast(Player speaker, List<String> message) {
+                Set<Player> recipients = new HashSet<Player>(Arrays.asList(getPlugin().getServer().getOnlinePlayers()));
+                filterRecipients(speaker.getName(), recipients);
+                for (Player recipient : recipients) {
+                        for (String line : message) recipient.sendMessage(line);
+                }
+        }
+
+        public void broadcast(Player speaker, String message) {
+                broadcast(speaker, Arrays.asList(message));
         }
 
         public static IgnoreComponent getInstance() {
