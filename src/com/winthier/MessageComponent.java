@@ -22,11 +22,13 @@ package com.winthier;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 
 public class MessageComponent extends AbstractComponent implements Listener {
         private MessageNode root = new MessageNode();
@@ -73,29 +75,45 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 return node.errorMessage;
         }
 
-        @EventHandler(ignoreCancelled = true)
-        public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-                String[] tokens = event.getMessage().split(" +");
-                tokens[0] = tokens[0].substring(1, tokens[0].length());
-                if (tokens.length == 0) return;
+        /**
+         * @return true if the command was recognized, false otherwise.
+         */
+        public boolean onCommand(CommandSender sender, String message) {
+                String[] tokens = message.split(" +");
+                if (tokens[0].startsWith("/")) {
+                        tokens[0] = tokens[0].substring(1, tokens[0].length());
+                }
+                if (tokens.length == 0) return false;
                 MessageNode node = root;
                 for (String token : tokens) {
                         MessageNode nextNode = node.subNodes.get(token.toLowerCase());
                         if (nextNode == null) {
-                                if (node == root) return;
-                                event.getPlayer().sendMessage(getErrorMessage(node));
-                                event.setCancelled(true);
-                                return;
+                                if (node == root) return false;
+                                sender.sendMessage(getErrorMessage(node));
+                                return true;
                         }
                         node = nextNode;
                 }
                 if (node.message == null) {
-                        event.getPlayer().sendMessage(getErrorMessage(node));
+                        sender.sendMessage(getErrorMessage(node));
                 } else {
-                        for (String line : node.message) event.getPlayer().sendMessage(line);
+                        for (String line : node.message) sender.sendMessage(line);
                 }
-                event.setCancelled(true);
-                return;
+                return true;
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+                if (onCommand(event.getPlayer(), event.getMessage())) {
+                        event.setCancelled(true);
+                }
+        }
+
+        @EventHandler
+        public void onServerCommand(ServerCommandEvent event) {
+                if (onCommand(event.getSender(), event.getCommand())) {
+                        event.setCommand("winthier devnull");
+                }
         }
 }
 

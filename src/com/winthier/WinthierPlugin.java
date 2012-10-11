@@ -79,6 +79,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
+                if (args.length == 1 && args[0].equals("devnull")) return true;
                 if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
                         reloadConfig();
                         for (Component component : components) {
