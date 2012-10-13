@@ -11,7 +11,7 @@ components:
     - '&c* &7No &cwhining&7 or &coffensive language&7. Be respectful.'
     - '&c* &7No &cugly&7 or &coffensive&7 builds or &c1x1&7 towers.'
     - '&c* &7Use &ccommon sense&7 and do not create unreasonable &clag&7.'
-    PasswordLine: '&c* &7Become member via &c/pw $password&7.'
+    PasswordLine: '&c* &7Become member via &c/pw {password}&7.'
   motd:
     Message:
     - '&3Welcome to &bWinnilla&3 - Winthier semi vanilla MC server'
@@ -23,5 +23,12 @@ components:
       - '&7This is the default &bHelp&7 screen provided by the Winthier plugin.'
   playermessages:
     DeathMessageColor: '8'
-    JoinMessage: '&8$player joined'
-    LeaveMessage: '&8$player left'
+    JoinMessage: '&8{player} joined'
+    LeaveMessage: '&8{player} left'
+  chat:
+    ConsoleName: 'Console'
+    me:
+      Format: '&f* &6{player} &f$message'
+    msg:
+      SenderFormat: '&7to &f{to}&7: {message}'
+      RecipientFormat: '&7from &f{from}&7: {message}'

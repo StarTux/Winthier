@@ -38,7 +38,7 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
         private ChatColor deathMsgColor;
         private List<Object> joinMsg;
         private List<Object> leaveMsg;
-        private VariableReplacer variables = new VariableReplacer("\\$(\\w+)\\b");
+        private VariableReplacer variables = new VariableReplacer("\\{(\\w+)\\}");
 
         public PlayerMessagesComponent(WinthierPlugin plugin) {
                 super(plugin, "playermessages");

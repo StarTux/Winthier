@@ -73,6 +73,18 @@ public class StringFilter {
                 return tokens;
         }
 
+        public Message parseMessage(String input) {
+                Message result = new Message();
+                result.addLine(filter(input));
+                return result;
+        }
+
+        public Message parseMessage(List<String> input) {
+                Message result = new Message();
+                for (String line : input) result.addLine(filter(line));
+                return result;
+        }
+
         public static String build(List<Object> input) {
                 StringBuilder builder = new StringBuilder();
                 for (Object o : input) {

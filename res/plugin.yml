@@ -31,10 +31,22 @@ permissions:
   winthier.cmd.rules:
     description: Use the /rules command
     default: op
+  winthier.chat.pm:
+    description: Send private messages via /msg, /tell, /reply or /r.
+    default: op
+  winthier.chat.me:
+    description: Use the /me command.
+    default: op
   winthier.password.notify:
     description: Get notified when a user gets promoted after entering the correct password.
-  winthier.joinleavemsg:
-    description: Display a message when the player joins or leaves.
+  winthier.playermessages.join:
+    description: Display a message when the player joins the game.
+    default: op
+  winthier.playermessages.leave:
+    description: Display a message when the player leaves the game.
+    default: op
+  winthier.playermessages.death:
+    description: Display a message when the player dies.
     default: op
   winthier.deathmessage.visible:
     description: Send a message upon player death

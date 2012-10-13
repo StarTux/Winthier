@@ -53,7 +53,7 @@ public class RulesComponent extends AbstractComponent implements CommandExecutor
 
         public String getPasswordLine(Player player) {
                 StringFilter filter = new ColorStringFilter();
-                filter.addReplacer(new FixedStringReplacer("$password", PasswordComponent.getInstance().getPassword(player.getName())));
+                filter.addReplacer(new FixedStringReplacer("{password}", PasswordComponent.getInstance().getPassword(player.getName())));
                 return filter.replace(passwordLine);
         }
 

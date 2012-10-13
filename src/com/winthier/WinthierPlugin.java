@@ -49,6 +49,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new MessageComponent(this));
                 components.add(new IgnoreComponent(this));
                 components.add(new PlayerMessagesComponent(this));
+                components.add(new ChatComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();

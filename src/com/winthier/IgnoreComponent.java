@@ -209,16 +209,16 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                 return new LinkedHashSet<String>(ignoreList);
         }
 
-        public void broadcast(Player speaker, List<String> message, boolean ignoreSelf) {
+        public void broadcast(CommandSender speaker, List<String> message, boolean ignoreSelf) {
                 Set<Player> recipients = new HashSet<Player>(Arrays.asList(getPlugin().getServer().getOnlinePlayers()));
-                if (ignoreSelf) recipients.remove(speaker);
+                if (speaker instanceof Player && ignoreSelf) recipients.remove((Player)speaker);
                 filterRecipients(speaker.getName(), recipients);
                 for (Player recipient : recipients) {
                         for (String line : message) recipient.sendMessage(line);
                 }
         }
 
-        public void broadcast(Player speaker, String message, boolean ignoreSelf) {
+        public void broadcast(CommandSender speaker, String message, boolean ignoreSelf) {
                 broadcast(speaker, Arrays.asList(message), ignoreSelf);
         }
 
