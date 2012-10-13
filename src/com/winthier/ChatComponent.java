@@ -54,9 +54,8 @@ public class ChatComponent extends AbstractComponent implements Listener {
 
         @EventHandler(ignoreCancelled = true)
         public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-                String msg = event.getMessage();
-                if (onCommand(event.getPlayer(), msg.substring(1, msg.length()))) {
-                        getPlugin().getLogger().info(event.getPlayer().getName() + " issued command: " + msg.trim());
+                if (onCommand(event.getPlayer(), event.getMessage().substring(1))) {
+                        getPlugin().getLogger().info(event.getPlayer().getName() + " issued command: " + event.getMessage().trim());
                         event.setCancelled(true);
                 }
         }

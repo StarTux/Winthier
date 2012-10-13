@@ -80,9 +80,6 @@ public class MessageComponent extends AbstractComponent implements Listener {
          */
         public boolean onCommand(CommandSender sender, String message) {
                 String[] tokens = message.split(" +");
-                if (tokens[0].startsWith("/")) {
-                        tokens[0] = tokens[0].substring(1, tokens[0].length());
-                }
                 if (tokens.length == 0) return false;
                 MessageNode node = root;
                 for (String token : tokens) {
@@ -104,7 +101,8 @@ public class MessageComponent extends AbstractComponent implements Listener {
 
         @EventHandler(ignoreCancelled = true)
         public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-                if (onCommand(event.getPlayer(), event.getMessage())) {
+                if (onCommand(event.getPlayer(), event.getMessage().substring(1))) {
+                        getPlugin().getLogger().info(event.getPlayer().getName() + " issued command: " + event.getMessage().trim());
                         event.setCancelled(true);
                 }
         }
