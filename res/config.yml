@@ -28,7 +28,7 @@ components:
   chat:
     ConsoleName: 'Console'
     me:
-      Format: '&f* &6{player} &f$message'
+      Format: '&f* &6{player} &f{message}'
     msg:
       SenderFormat: '&7to &f{to}&7: {message}'
       RecipientFormat: '&7from &f{from}&7: {message}'

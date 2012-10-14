@@ -121,9 +121,10 @@ public class ChatComponent extends AbstractComponent implements Listener {
                                 recipientMessage.setVariable("message", message);
                                 recipientMessage.sendTo(recipient);
                         }
+                        getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
                         lastPm.put(recipient, sender);
                 } else if (cmd.equalsIgnoreCase("reply") || cmd.equalsIgnoreCase("r")) {
-                        if (!sender.hasPermission("winthier.cmd.msg")) {
+                        if (!sender.hasPermission("winthier.chat.pm")) {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission.");
                                 return true;
                         }
@@ -147,6 +148,7 @@ public class ChatComponent extends AbstractComponent implements Listener {
                                 recipientMessage.setVariable("message", message);
                                 recipientMessage.sendTo(recipient);
                         }
+                        getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
                         lastPm.put(recipient, sender);
                 } else if (cmd.equalsIgnoreCase("me")) {
                         if (!sender.hasPermission("winthier.chat.me")) {
