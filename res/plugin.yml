@@ -21,6 +21,10 @@ commands:
     description: Ignore another player in chat
     usage: /<command> <player>
     permission: winthier.cmd.ignore
+  wither:
+    description: Turn wither spawning on or off
+    usage: /<command> [on/off]
+    permission: winthier.cmd.wither
 permissions:
   winthier.cmd.pw:
     description: Use the /pw command to become a member
@@ -84,3 +88,9 @@ permissions:
     - winthier.signcolor.n
     - winthier.signcolor.o
     - winthier.signcolor.r
+  winthier.newbiewatch.notify:
+    description: Get notified when a newbie breaks a watched block
+    default: op
+  winthier.cmd.wither:
+    description: Use the /wither command
+    default: op

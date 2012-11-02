@@ -32,3 +32,7 @@ components:
     msg:
       SenderFormat: '&7to &f{to}&7: {message}'
       RecipientFormat: '&7from &f{from}&7: {message}'
+  newbiewatch:
+    MaxBlockBreaks: 100
+    BlockBreaks: [ glass, glowstone, thin-glass, redstone-lamp-off, redstone-lamp-on, bed_block, diamond-block, diamond-ore, gold-block, cauldron, bookshelf, brewing-stand, enchantment_table, ender-chest, iron_block, jukebox, lapis-block, redstone-wire, diode-block-off, diode-block-on, redstone-torch-off, redstone-torch-on, iron-fence, rails, powered-rail, detector-rail, emerald-block, dragon-egg ]
+    BlockBreakMessage: '&4New player &c{player}&4 broke &c{block}'
