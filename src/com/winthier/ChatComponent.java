@@ -37,7 +37,7 @@ public class ChatComponent extends AbstractComponent implements Listener {
         private VariableMessage senderMessage;
         private VariableMessage recipientMessage;
         private String consoleName;
-        private Map<CommandSender, CommandSender> lastPm = new HashMap<CommandSender, CommandSender>();
+        private Map<String, String> lastPMs = new HashMap<String, String>();
 
         public ChatComponent(WinthierPlugin plugin) {
                 super(plugin, "chat");
@@ -84,6 +84,20 @@ public class ChatComponent extends AbstractComponent implements Listener {
                 return result;
         }
 
+        private void setLastPM(CommandSender recipient, CommandSender sender) {
+                String recipientName = recipient instanceof ConsoleCommandSender ? "!" : recipient.getName();
+                String senderName = sender instanceof ConsoleCommandSender ? "!" : sender.getName();
+                lastPMs.put(recipientName, senderName);
+        }
+
+        private CommandSender getLastPM(CommandSender recipient) {
+                String recipientName = recipient instanceof ConsoleCommandSender ? "!" : recipient.getName();
+                String senderName = lastPMs.get(recipientName);
+                if (senderName == null) return null;
+                CommandSender sender = senderName.equals("!") ? getPlugin().getServer().getConsoleSender() : getPlugin().getServer().getPlayerExact(senderName);
+                return sender;
+        }
+
         protected boolean onCommand(CommandSender sender, String command) {
                 String[] tokens = command.split(" +", 2);
                 if (tokens.length == 0) return false;
@@ -122,13 +136,13 @@ public class ChatComponent extends AbstractComponent implements Listener {
                                 recipientMessage.sendTo(recipient);
                         }
                         getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
-                        lastPm.put(recipient, sender);
+                        setLastPM(recipient, sender);
                 } else if (cmd.equalsIgnoreCase("reply") || cmd.equalsIgnoreCase("r")) {
                         if (!sender.hasPermission("winthier.chat.pm")) {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission.");
                                 return true;
                         }
-                        CommandSender recipient = lastPm.get(sender);
+                        CommandSender recipient = getLastPM(sender);
                         if (recipient == null) {
                                 sender.sendMessage("" + ChatColor.RED + "No previous message.");
                                 return true;
@@ -149,7 +163,7 @@ public class ChatComponent extends AbstractComponent implements Listener {
                                 recipientMessage.sendTo(recipient);
                         }
                         getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
-                        lastPm.put(recipient, sender);
+                        setLastPM(recipient, sender);
                 } else if (cmd.equalsIgnoreCase("me")) {
                         if (!sender.hasPermission("winthier.chat.me")) {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission.");
