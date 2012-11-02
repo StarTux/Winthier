@@ -85,9 +85,5 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onPlayerKick(PlayerKickEvent event) {
                 event.setLeaveMessage("");
-                if (event.getPlayer().hasPermission("winthier.playermessages.leave")) {
-                        variables.setVariable("player", event.getPlayer().getName());
-                        IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(leaveMsg), true);
-                }
         }
 }
