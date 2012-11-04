@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -46,7 +47,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class IgnoreComponent extends AbstractComponent implements CommandExecutor, Listener {
         private static IgnoreComponent instance;
-        private Map<String, Set<String>> ignoreLists = new LinkedHashMap<String, Set<String>>();
+        private Map<String, Set<String>> ignoreLists = Collections.synchronizedMap(new LinkedHashMap<String, Set<String>>());
+        private Set<String> muteList = Collections.synchronizedSet(new HashSet<String>());
 
         public IgnoreComponent(WinthierPlugin plugin) {
                 super(plugin, "ignore");
@@ -56,47 +58,96 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
         @Override
         public void enable() {
                 getPlugin().getCommand("ignore").setExecutor(this);
+                getPlugin().getCommand("mute").setExecutor(this);
+                getPlugin().getCommand("unmute").setExecutor(this);
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
-                if (!(sender instanceof Player)) {
-                        sender.sendMessage(ChatColor.RED + "Player expected!");
-                        return true;
-                }
-                Player ignorer = (Player)sender;
-                if (args.length == 0) {
-                        Set<String> ignorees = getIgnoreList(ignorer.getName());
-                        if (ignorees.size() == 0) {
-                                sender.sendMessage("You are not ignoring anyone.");
-                        } else {
-                                StringBuilder sb = new StringBuilder("Ignored players:");
-                                for (String ignoree : ignorees) sb.append(" ").append(ignoree);
-                                sender.sendMessage(sb.toString());
-                        }
-                        return true;
-                }
-                if (args.length == 1) {
-                        String ignoree = getPlayer(args[0], ignorer.getName());
-                        if (ignoree == null) {
-                                sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
+                if (token.equals("ignore")) {
+                        if (!(sender instanceof Player)) {
+                                sender.sendMessage(ChatColor.RED + "Player expected!");
                                 return true;
                         }
-                        boolean ignore = toggleIgnore(ignorer.getName(), ignoree);
-                        sender.sendMessage((ignore ? "Ignoring " : "No longer ignoring ") + ignoree);
-                } else {
-                        for (String arg : args) {
-                                String ignoree = getPlayer(arg, ignorer.getName());
-                                if (ignoree == null) {
-                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + arg);
+                        Player ignorer = (Player)sender;
+                        if (args.length == 0) {
+                                Set<String> ignorees = getIgnoreList(ignorer.getName());
+                                if (ignorees.size() == 0) {
+                                        sender.sendMessage("You are not ignoring anyone.");
                                 } else {
-                                        setIgnore(ignorer.getName(), ignoree, true);
-                                        sender.sendMessage("Ignoring " + ignoree);
+                                        StringBuilder sb = new StringBuilder("Ignored players:");
+                                        for (String ignoree : ignorees) sb.append(" ").append(ignoree);
+                                        sender.sendMessage(sb.toString());
+                                }
+                                return true;
+                        }
+                        if (args.length == 1) {
+                                String ignoree = getPlayer(args[0], ignorer.getName());
+                                if (ignoree == null) {
+                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
+                                        return true;
+                                }
+                                boolean ignore = toggleIgnore(ignorer.getName(), ignoree);
+                                sender.sendMessage((ignore ? "Ignoring " : "No longer ignoring ") + ignoree);
+                        } else {
+                                for (String arg : args) {
+                                        String ignoree = getPlayer(arg, ignorer.getName());
+                                        if (ignoree == null) {
+                                                sender.sendMessage("" + ChatColor.RED + "Player not found: " + arg);
+                                        } else {
+                                                setIgnore(ignorer.getName(), ignoree, true);
+                                                sender.sendMessage("Ignoring " + ignoree);
+                                        }
                                 }
                         }
+                        return true;
+                } else if (token.equals("mute")) {
+                        if (args.length == 0) {
+                                // list muted players
+                                if (muteList.isEmpty()) {
+                                        sender.sendMessage("No players muted");
+                                } else {
+                                        StringBuilder sb = new StringBuilder("Muted players:");
+                                        synchronized(muteList) {
+                                                for (String name : muteList) sb.append(" ").append(name);
+                                        }
+                                }
+                        } else if (args.length == 1) {
+                                // mute a player
+                                String mutee = getPlayer(args[0]);
+                                if (mutee == null) {
+                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
+                                } else {
+                                        if (muteList.contains(mutee)) {
+                                                muteList.remove(mutee);
+                                                sender.sendMessage(mutee + " has been unmuted");
+                                        } else {
+                                                muteList.add(mutee);
+                                                sender.sendMessage(mutee + " is now muted");
+                                        }
+                                }
+                        } else {
+                                return false;
+                        }
+                        return true;
+                } else if (token.equals("unmute")) {
+                        if (args.length == 1) {
+                                String mutee = getPlayer(args[0]);
+                                if (mutee == null) {
+                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
+                                } else {
+                                        if (muteList.contains(mutee)) {
+                                                muteList.remove(mutee);
+                                                sender.sendMessage(mutee + " has been unmuted");
+                                        } else {
+                                                sender.sendMessage("" + ChatColor.RED + mutee + " is not muted");
+                                        }
+                                }
+                                return true;
+                        }
                 }
-                return true;
+                return false;
         }
 
         @Override
@@ -110,9 +161,7 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                         e.printStackTrace();
                         return;
                 }
-                synchronized(this) {
-                        ignoreLists.clear();
-                }
+                ignoreLists.clear();
                 for (String ignorer : conf.getKeys(false)) {
                         for (String ignoree : conf.getStringList(ignorer)) {
                                 setIgnore(ignorer, ignoree, true);
@@ -123,7 +172,7 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
         @Override
         public void saveConfiguration() {
                 FileConfiguration conf = new YamlConfiguration();
-                synchronized(this) {
+                synchronized(ignoreLists) {
                         for (String ignorer : ignoreLists.keySet()) {
                                 conf.set(ignorer, new ArrayList<String>(ignoreLists.get(ignorer)));
                         }
@@ -142,7 +191,7 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                 player = getPlugin().getServer().getOfflinePlayer(name);
                 if (player.hasPlayedBefore()) return player.getName();
                 if (forPlayer != null) {
-                        synchronized(this) {
+                        synchronized(ignoreLists) {
                                 Set<String> ignoreList = ignoreLists.get(forPlayer);
                                 if (ignoreList != null) {
                                         for (String entry : ignoreList) {
@@ -162,51 +211,69 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
         public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+                if (muteList.contains(event.getPlayer().getName())) {
+                        event.setCancelled(true);
+                        return;
+                }
                 filterRecipients(event.getPlayer().getName(), event.getRecipients());
         }
 
-        public synchronized void setIgnore(String ignorer, String ignoree, boolean ignore) {
-                Set<String> ignoreList = ignoreLists.get(ignorer);
-                if (ignoreList == null) {
-                        if (!ignore) return;
-                        ignoreList = new LinkedHashSet<String>();
-                        ignoreLists.put(ignorer, ignoreList);
-                }
-                if (ignore) {
-                        ignoreList.add(ignoree);
-                } else {
-                        ignoreList.remove(ignoree);
-                        if (ignoreList.isEmpty()) ignoreLists.remove(ignorer);
-                }
-        }
-
-        public synchronized boolean doesIgnore(String ignorer, String ignoree) {
-                Set<String> ignoreList = ignoreLists.get(ignorer);
-                if (ignoreList == null) return false;
-                return ignoreList.contains(ignoree);
-        }
-
-        public synchronized boolean toggleIgnore(String ignorer, String ignoree) {
-                boolean ignore = !doesIgnore(ignorer, ignoree);
-                setIgnore(ignorer, ignoree, ignore);
-                return ignore;
-        }
-
-        public synchronized void filterRecipients(String ignoree, Collection<Player> recipients) {
-                for (Iterator<Player> it = recipients.iterator(); it.hasNext(); ) {
-                        String ignorer = it.next().getName();
+        public void setIgnore(String ignorer, String ignoree, boolean ignore) {
+                synchronized(ignoreLists) {
                         Set<String> ignoreList = ignoreLists.get(ignorer);
-                        if (ignoreList == null) continue;
-                        if (ignoreList.contains(ignoree)) {
-                                it.remove();
+                        if (ignoreList == null) {
+                                if (!ignore) return;
+                                ignoreList = new LinkedHashSet<String>();
+                                ignoreLists.put(ignorer, ignoreList);
+                        }
+                        if (ignore) {
+                                ignoreList.add(ignoree);
+                        } else {
+                                ignoreList.remove(ignoree);
+                                if (ignoreList.isEmpty()) ignoreLists.remove(ignorer);
                         }
                 }
         }
 
-        public synchronized Set<String> getIgnoreList(String ignorer) {
-                Set<String> ignoreList = ignoreLists.get(ignorer);
-                if (ignoreList == null) return new HashSet<String>();
-                return new LinkedHashSet<String>(ignoreList);
+        public boolean doesIgnore(String ignorer, String ignoree) {
+                synchronized(ignoreLists) {
+                        Set<String> ignoreList = ignoreLists.get(ignorer);
+                        if (ignoreList == null) return false;
+                        return ignoreList.contains(ignoree);
+                }
+        }
+
+        public boolean toggleIgnore(String ignorer, String ignoree) {
+                synchronized(ignoreLists) {
+                        boolean ignore = !doesIgnore(ignorer, ignoree);
+                        setIgnore(ignorer, ignoree, ignore);
+                        return ignore;
+                }
+        }
+
+        public void filterRecipients(String ignoree, Collection<Player> recipients) {
+                if (muteList.contains(ignoree)) {
+                        recipients.clear();
+                        return;
+                }
+                synchronized(ignoreLists) {
+                        for (Iterator<Player> it = recipients.iterator(); it.hasNext(); ) {
+                                String ignorer = it.next().getName();
+                                Set<String> ignoreList = ignoreLists.get(ignorer);
+                                if (ignoreList == null) continue;
+                                if (ignoreList.contains(ignoree)) {
+                                        it.remove();
+                                }
+                        }
+                }
+        }
+
+        public Set<String> getIgnoreList(String ignorer) {
+                synchronized(ignoreLists) {
+                        Set<String> ignoreList = ignoreLists.get(ignorer);
+                        if (ignoreList == null) return new HashSet<String>();
+                        return new LinkedHashSet<String>(ignoreList);
+                }
         }
 
         public void broadcast(CommandSender speaker, List<String> message, boolean ignoreSelf) {
