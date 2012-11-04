@@ -112,6 +112,7 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                                         synchronized(muteList) {
                                                 for (String name : muteList) sb.append(" ").append(name);
                                         }
+                                        sender.sendMessage(sb.toString());
                                 }
                         } else if (args.length == 1) {
                                 // mute a player
@@ -199,6 +200,13 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
                                                         return entry;
                                                 }
                                         }
+                                }
+                        }
+                }
+                synchronized(muteList) {
+                        for (String entry : muteList) {
+                                if (entry.toLowerCase().startsWith(name.toLowerCase())) {
+                                        return entry;
                                 }
                         }
                 }
