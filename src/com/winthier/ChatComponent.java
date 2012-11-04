@@ -19,9 +19,12 @@
 
 package com.winthier;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -29,6 +32,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
@@ -129,14 +133,26 @@ public class ChatComponent extends AbstractComponent implements Listener {
                         senderMessage.setVariable("to", getName(recipient));
                         senderMessage.setVariable("message", message);
                         senderMessage.sendTo(sender);
+                        if (sender instanceof Player && recipient instanceof Player) {
+                                Set<Player> recipients = new HashSet<Player>(1);
+                                recipients.add((Player)recipient);
+                                AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(false, (Player)sender, message.toString(), recipients);
+                                getPlugin().getServer().getPluginManager().callEvent(event);
+                                if (event.isCancelled() || event.getRecipients().isEmpty()) {
+                                        getPlugin().getLogger().info(sender.getName() + " -/> " + recipient.getName() + ": " + message);
+                                        return true;
+                                }
+                        }
                         if (!IgnoreComponent.getInstance().doesIgnore(sender.getName(), recipient.getName())) {
                                 recipientMessage.setVariable("from", getName(sender));
                                 recipientMessage.setVariable("to", getName(recipient));
                                 recipientMessage.setVariable("message", message);
                                 recipientMessage.sendTo(recipient);
+                                getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
+                                setLastPM(recipient, sender);
+                        } else {
+                                getPlugin().getLogger().info(sender.getName() + " -/> " + recipient.getName() + ": " + message);
                         }
-                        getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
-                        setLastPM(recipient, sender);
                 } else if (cmd.equalsIgnoreCase("reply") || cmd.equalsIgnoreCase("r")) {
                         if (!sender.hasPermission("winthier.chat.pm")) {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission.");
@@ -156,14 +172,26 @@ public class ChatComponent extends AbstractComponent implements Listener {
                         senderMessage.setVariable("to", getName(recipient));
                         senderMessage.setVariable("message", message);
                         senderMessage.sendTo(sender);
+                        if (sender instanceof Player && recipient instanceof Player) {
+                                Set<Player> recipients = new HashSet<Player>(1);
+                                recipients.add((Player)recipient);
+                                AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(false, (Player)sender, message.toString(), recipients);
+                                getPlugin().getServer().getPluginManager().callEvent(event);
+                                if (event.isCancelled() || event.getRecipients().isEmpty()) {
+                                        getPlugin().getLogger().info(sender.getName() + " -/> " + recipient.getName() + ": " + message);
+                                        return true;
+                                }
+                        }
                         if (!IgnoreComponent.getInstance().doesIgnore(sender.getName(), recipient.getName())) {
                                 recipientMessage.setVariable("from", getName(sender));
                                 recipientMessage.setVariable("to", getName(recipient));
                                 recipientMessage.setVariable("message", message);
                                 recipientMessage.sendTo(recipient);
+                                getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
+                                setLastPM(recipient, sender);
+                        } else {
+                                getPlugin().getLogger().info(sender.getName() + " -/> " + recipient.getName() + ": " + message);
                         }
-                        getPlugin().getLogger().info(sender.getName() + " -> " + recipient.getName() + ": " + message);
-                        setLastPM(recipient, sender);
                 } else if (cmd.equalsIgnoreCase("me")) {
                         if (!sender.hasPermission("winthier.chat.me")) {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission.");
@@ -175,7 +203,16 @@ public class ChatComponent extends AbstractComponent implements Listener {
                         }
                         meMessage.setVariable("player", getName(sender));
                         meMessage.setVariable("message", getColorFilter(sender).replace(args));
-                        IgnoreComponent.getInstance().broadcast(sender, meMessage.toString(), false);
+                        Set<Player> recipients = new HashSet<Player>();
+                        Collections.addAll(recipients, getPlugin().getServer().getOnlinePlayers());
+                        if (sender instanceof Player) {
+                                AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(false, (Player)sender, sender.getName() + " " + args, recipients);
+                                getPlugin().getServer().getPluginManager().callEvent(event);
+                                if (event.isCancelled() || event.getRecipients().isEmpty()) {
+                                        return true;
+                                }
+                        }
+                        for (Player recipient : recipients) meMessage.sendTo(recipient);
                 } else {
                         return false;
                 }
