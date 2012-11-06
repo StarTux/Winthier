@@ -3,7 +3,7 @@ main: com.winthier.WinthierPlugin
 version: 0.1
 author: StarTux
 description: The Winthier Plugin
-depends: [ Vault ]
+depends: [ Vault, WorlEdit, WorldGuard ]
 commands:
   pw:
     description: Become a member
@@ -31,7 +31,7 @@ commands:
     permission: winthier.cmd.mute
   wither:
     description: Turn wither spawning on or off
-    usage: /<command> [on/off]
+    usage: /<command>
     permission: winthier.cmd.wither
 permissions:
   winthier.cmd.pw:
