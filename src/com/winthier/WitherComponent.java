@@ -141,4 +141,10 @@ public class WitherComponent extends AbstractComponent implements CommandExecuto
                 }
                 event.setCancelled(true);
         }
+
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+        public void onCreatureSpawnMonitor(CreatureSpawnEvent event) {
+                if (event.getEntity().getType() != EntityType.WITHER) return;
+                getPlugin().getServer().getLogger().info(String.format("[Wither] A wither was spawned in %s at %d,%d,%d", event.getLocation().getWorld().getName(), event.getLocation().getBlockX(), event.getLocation().getBlockY(), event.getLocation().getBlockZ()));
+        }
 }
