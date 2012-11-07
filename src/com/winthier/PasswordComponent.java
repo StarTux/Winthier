@@ -32,6 +32,8 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
         private int passwordLength;
         private static PasswordComponent instance;
         private int salt = new Random(System.currentTimeMillis()).nextInt();
+        private VariableMessage congratulationsMessage;
+        private VariableMessage announcementMessage;
 
         public PasswordComponent(WinthierPlugin plugin) {
                 super(plugin, "password");
@@ -52,6 +54,8 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
                 fromGroup = getConfig().getString("FromGroup");
                 toGroup = getConfig().getString("ToGroup");
                 passwordLength = getConfig().getInt("PasswordLength");
+                congratulationsMessage = new VariableStringFilter().parseMessage(getConfig().getStringList("messages.Congratulations"));
+                announcementMessage = new VariableStringFilter().parseMessage(getConfig().getString("messages.Announcement"));
         }
 
         @Override
@@ -73,11 +77,18 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
                 }
                 getPlugin().getPermission().playerRemoveGroup(player, fromGroup);
                 getPlugin().getPermission().playerAddGroup(player, toGroup);
-                sender.sendMessage(ChatColor.DARK_AQUA + "You have been promoted to " + ChatColor.AQUA + toGroup + ChatColor.DARK_AQUA + "!");
+                congratulationsMessage.setVariable("player", player.getName());
+                congratulationsMessage.setVariable("fromgroup", fromGroup);
+                congratulationsMessage.setVariable("togroup", toGroup);
+                congratulationsMessage.sendTo(player);
+                announcementMessage.setVariable("player", player.getName());
+                announcementMessage.setVariable("fromgroup", fromGroup);
+                announcementMessage.setVariable("togroup", toGroup);
+                String announcement = announcementMessage.toString();
                 for (Player recipient : getPlugin().getServer().getOnlinePlayers()) {
                         if (!recipient.hasPermission("winthier.password.notify")) continue;
                         if (recipient.equals(player)) continue;
-                        recipient.sendMessage(ChatColor.AQUA + sender.getName() + ChatColor.DARK_AQUA + " has become a " + ChatColor.AQUA + toGroup + ChatColor.DARK_AQUA + "!");
+                        recipient.sendMessage(announcement);
                 }
                 
                 return true;

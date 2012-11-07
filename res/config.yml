@@ -3,6 +3,10 @@ components:
     FromGroup: guest
     ToGroup: member
     PasswordLength: 5
+    messages:
+      Congratulations:
+      - '&3You have been promoted to &b{togroup}&3!'
+      Announcement: '&b{player}&3 has become a &b{togroup}&3!'
   rules:
     Rules:
     - '&7* &cRULES&7 *'

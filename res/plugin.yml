@@ -57,6 +57,7 @@ permissions:
     default: op
   winthier.password.notify:
     description: Get notified when a user gets promoted after entering the correct password.
+    default: op
   winthier.playermessages.join:
     description: Display a message when the player joins the game.
     default: op
