@@ -218,12 +218,4 @@ public class ChatComponent extends AbstractComponent implements Listener {
                 }
                 return true;
         }
-
-        protected void msgCommand(CommandSender sender, String token, String args) {
-                System.out.println(sender.getName() + " /" + token + " " + args);
-        }
-
-        protected void meCommand(CommandSender sender, String token, String args) {
-                System.out.println(sender.getName() + " /" + token + " " + args);
-        }
 }
