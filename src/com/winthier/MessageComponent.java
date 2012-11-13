@@ -22,6 +22,7 @@ package com.winthier;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
@@ -61,8 +62,12 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 if (errorMessage != null) {
                         node.errorMessage = filter.replace(errorMessage);
                 }
+                String permission = conf.getString("Permission", null);
+                if (permission != null) {
+                        node.permission = permission;
+                }
                 for (String key : conf.getKeys(false)) {
-                        if (Character.isLowerCase(key.charAt(0))) {
+                        if (!Character.isUpperCase(key.charAt(0))) {
                                 MessageNode newNode = new MessageNode(node);
                                 configureNode(newNode, conf.getConfigurationSection(key));
                                 node.subNodes.put(key.toLowerCase(), newNode);
@@ -93,6 +98,8 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 }
                 if (node.message == null) {
                         sender.sendMessage(getErrorMessage(node));
+                } else if (node.permission != null && !sender.hasPermission(node.permission)) {
+                        sender.sendMessage("" + ChatColor.RED + "You don't have permission");
                 } else {
                         for (String line : node.message) sender.sendMessage(line);
                 }
@@ -120,6 +127,7 @@ class MessageNode {
         public List<String> message;
         public String errorMessage;
         public MessageNode parent = null;
+        public String permission = null;
         public MessageNode() {}
         public MessageNode(MessageNode parent) {
                 this.parent = parent;
