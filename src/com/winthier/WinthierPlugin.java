@@ -42,6 +42,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
         public void onEnable() {
                 getServer().getPluginManager().registerEvents(this, this);
                 setupPermissions();
+                components.add(new NoClientModsComponent(this));
                 components.add(new PasswordComponent(this));
                 components.add(new RulesComponent(this));
                 components.add(new MotdComponent(this));
@@ -102,43 +103,5 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         return true;
                 }
                 return false;
-        }
-
-        @EventHandler(priority = EventPriority.MONITOR)
-        public void onPlayerJoin(PlayerJoinEvent event) {
-                if (!event.getPlayer().hasPermission("winthier.cheatmods")) {
-                        String message = "";
-                        // Disable Zombe's fly mod.
-                        message += "§f §f §1 §0 §2 §4";
-                        // Disable Zombe's noclip.
-                        message += "§f §f §4 §0 §9 §6";
-                        // Disable Zombe's cheat.
-                        message += "§f §f §2 §0 §4 §8";
-                        // Disable CJB's fly mod.
-                        message += "§3 §9 §2 §0 §0 §1";
-                        // Disable CJB's xray.
-                        message += "§3 §9 §2 §0 §0 §2";
-                        // Disable CJB's radar.
-                        message += "§3 §9 §2 §0 §0 §3";
-                        // Disable Minecraft AutoMap's ores.
-                        message += "§0§0§1§f§e";
-                        // Disable Minecraft AutoMap's cave mode.
-                        message += "§0§0§2§f§e";
-                        // Disable Minecraft AutoMap's radar.
-                        message += "§0§0§3§4§5§6§7§8§f§e";
-                        // Disable Smart Moving's climbing.
-                        message += "§0§1§0§1§2§f§f";
-                        // Disable Smart Moving's climbing.
-                        message += "§0§1§3§4§f§f";
-                        // Disable Smart Moving's climbing.
-                        message += "§0§1§5§f§f";
-                        // Disable Smart Moving's climbing.
-                        message += "§0§1§6§f§f";
-                        // Disable Smart Moving's climbing.
-                        message += "§0§1§8§9§a§b§f§f";
-                        // Disable Smart Moving's climbing.
-                        message += "§0§1§7§f§f";
-                        event.getPlayer().sendMessage(message);
-                }
         }
 }

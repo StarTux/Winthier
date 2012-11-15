@@ -1,4 +1,6 @@
 components:
+  noclientmods:
+    enabled: true
   password:
     FromGroup: guest
     ToGroup: member
