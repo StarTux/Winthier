@@ -19,7 +19,7 @@
 
 package com.winthier;
 
-import org.bukkit.util.Vector;
+import org.bukkit.Location;
 import org.bukkit.World.Environment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -28,6 +28,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.util.Vector;
 
 public class NoVoidDeathComponent extends AbstractComponent implements Listener {
         public NoVoidDeathComponent(WinthierPlugin plugin) {
@@ -48,7 +49,11 @@ public class NoVoidDeathComponent extends AbstractComponent implements Listener 
                 player.sendMessage("You fell into the void. Please report this incident.");
                 player.setVelocity(new Vector(0, 0, 0));
                 player.setFallDistance(0f);
-                player.teleport(player.getWorld().getSpawnLocation(), TeleportCause.PLUGIN);
+                Location respawnLocation = player.getBedSpawnLocation();
+                if (respawnLocation == null) {
+                        respawnLocation = getPlugin().getServer().getWorlds().get(0).getSpawnLocation();
+                }
+                player.teleport(respawnLocation, TeleportCause.PLUGIN);
                 event.setCancelled(true);
         }
 }
