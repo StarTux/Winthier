@@ -54,6 +54,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new NewbieWatchComponent(this));
                 components.add(new WitherComponent(this));
                 components.add(new NoVoidDeathComponent(this));
+                components.add(new ExactSpawnComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();
