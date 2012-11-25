@@ -22,6 +22,7 @@ package com.winthier;
 import java.util.LinkedList;
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 
 public class Message {
         private List<List<Object>> lines = new LinkedList<List<Object>>();
@@ -33,14 +34,26 @@ public class Message {
         }
 
         public void sendTo(CommandSender recipient) {
-                for (List<Object> line : lines) {
-                        recipient.sendMessage(StringFilter.build(line));
+                if (recipient instanceof ConsoleCommandSender) {
+                        for (List<Object> line : lines) {
+                                recipient.sendMessage(StringFilter.buildNoColor(line));
+                        }
+                } else {
+                        for (List<Object> line : lines) {
+                                recipient.sendMessage(StringFilter.build(line));
+                        }
                 }
         }
 
         public String toString() {
                 StringBuilder sb = new StringBuilder();
                 for (List<Object> line : lines) sb.append(StringFilter.build(line));
+                return sb.toString();
+        }
+
+        public String toStringNoColor() {
+                StringBuilder sb = new StringBuilder();
+                for (List<Object> line : lines) sb.append(StringFilter.buildNoColor(line));
                 return sb.toString();
         }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.bukkit.ChatColor;
 
 public class StringFilter {
         /**
@@ -89,6 +90,14 @@ public class StringFilter {
                 StringBuilder builder = new StringBuilder();
                 for (Object o : input) {
                         builder.append(o.toString());
+                }
+                return builder.toString();
+        }
+
+        public static String buildNoColor(List<Object> input) {
+                StringBuilder builder = new StringBuilder();
+                for (Object o : input) {
+                        if (!(o instanceof ChatColor)) builder.append(o.toString());
                 }
                 return builder.toString();
         }

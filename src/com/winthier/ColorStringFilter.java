@@ -32,7 +32,7 @@ public class ColorStringFilter extends DefaultStringFilter {
                 }
                 @Override
                 public Object getReplacement(Matcher matcher) {
-                        return new StringFilter.Constant(ChatColor.getByChar(matcher.group(1)).toString());
+                        return ChatColor.getByChar(matcher.group(1)).toString();
                 }
         }
         public static final ColorReplacer COLOR_REPLACER = new ColorReplacer();

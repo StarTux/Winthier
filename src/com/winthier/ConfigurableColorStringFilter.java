@@ -31,7 +31,7 @@ public class ConfigurableColorStringFilter extends DefaultStringFilter {
                 public Object getReplacement(Matcher matcher) {
                         ChatColor color = ChatColor.getByChar(matcher.group(1));
                         if (!isAllowed(color)) return new StringFilter.Constant(matcher.group(0));
-                        return new StringFilter.Constant(color.toString());
+                        return color;
                 }
 
                 public void setAllowed(ChatColor color, boolean allow) {

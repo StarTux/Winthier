@@ -84,6 +84,7 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
                 announcementMessage.setVariable("player", player.getName());
                 announcementMessage.setVariable("fromgroup", fromGroup);
                 announcementMessage.setVariable("togroup", toGroup);
+                getPlugin().getLogger().info("[Password] " + announcementMessage.toStringNoColor());
                 String announcement = announcementMessage.toString();
                 for (Player recipient : getPlugin().getServer().getOnlinePlayers()) {
                         if (!recipient.hasPermission("winthier.password.notify")) continue;

@@ -87,10 +87,14 @@ public class NewbieWatchComponent extends AbstractComponent implements Listener 
                 }
                 blockBreakCount.put(event.getPlayer().getName(), count + 1);
                 if (blockBreaks.contains(event.getBlock().getType())) {
-                        getPlugin().getLogger().info("[NewbieWatch] New player " + event.getPlayer().getName() + " broke " + event.getBlock().getType());
                         blockBreakMessage.setVariable("player", event.getPlayer().getName());
                         String blockName = event.getBlock().getType().name();
                         blockBreakMessage.setVariable("block", "" + event.getBlock().getType().name().toLowerCase().replace("_", " "));
+                        blockBreakMessage.setVariable("position", String.format("%d,%d,%d", event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+                        blockBreakMessage.setVariable("x", "" + event.getBlock().getX());
+                        blockBreakMessage.setVariable("y", "" + event.getBlock().getY());
+                        blockBreakMessage.setVariable("z", "" + event.getBlock().getZ());
+                        getPlugin().getLogger().warning("[NewbieWatch] " + blockBreakMessage.toStringNoColor());
                         for (Player player : getPlugin().getServer().getOnlinePlayers()) {
                                 if (player.hasPermission("winthier.newbiewatch.notify")) {
                                         blockBreakMessage.sendTo(player);
