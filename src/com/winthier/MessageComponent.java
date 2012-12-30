@@ -66,6 +66,10 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 if (permission != null) {
                         node.permission = permission;
                 }
+                String overridePermission = conf.getString("OverridePermission", null);
+                if (overridePermission != null) {
+                        node.overridePermission = overridePermission;
+                }
                 for (String key : conf.getKeys(false)) {
                         if (!Character.isUpperCase(key.charAt(0))) {
                                 MessageNode newNode = new MessageNode(node);
@@ -96,6 +100,7 @@ public class MessageComponent extends AbstractComponent implements Listener {
                         }
                         node = nextNode;
                 }
+                if (node.overridePermission != null && sender.hasPermission(node.overridePermission)) return false;
                 if (node.message == null) {
                         sender.sendMessage(getErrorMessage(node));
                 } else if (node.permission != null && !sender.hasPermission(node.permission)) {
@@ -128,6 +133,7 @@ class MessageNode {
         public String errorMessage;
         public MessageNode parent = null;
         public String permission = null;
+        public String overridePermission = null;
         public MessageNode() {}
         public MessageNode(MessageNode parent) {
                 this.parent = parent;
