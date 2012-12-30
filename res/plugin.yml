@@ -3,7 +3,7 @@ main: com.winthier.WinthierPlugin
 version: 0.1
 author: StarTux
 description: The Winthier Plugin
-depends: [ Vault, WorlEdit, WorldGuard ]
+depend: [ Vault, WorldEdit, WorldGuard ]
 commands:
   pw:
     description: Become a member
