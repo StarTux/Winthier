@@ -70,11 +70,20 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 if (overridePermission != null) {
                         node.overridePermission = overridePermission;
                 }
+                List<String> aliases = conf.getStringList("Aliases");
+                if (aliases != null) {
+                        node.aliases = aliases;
+                }
                 for (String key : conf.getKeys(false)) {
                         if (!Character.isUpperCase(key.charAt(0))) {
                                 MessageNode newNode = new MessageNode(node);
                                 configureNode(newNode, conf.getConfigurationSection(key));
                                 node.subNodes.put(key.toLowerCase(), newNode);
+                                if (newNode.aliases != null) {
+                                        for (String alias : newNode.aliases) {
+                                                node.subNodes.put(alias.toLowerCase(), newNode);
+                                        }
+                                }
                         }
                 }
         }
@@ -130,6 +139,7 @@ public class MessageComponent extends AbstractComponent implements Listener {
 class MessageNode {
         public Map<String, MessageNode> subNodes = new LinkedHashMap<String, MessageNode>();
         public List<String> message;
+        public List<String> aliases;
         public String errorMessage;
         public MessageNode parent = null;
         public String permission = null;
