@@ -113,6 +113,10 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
         }
 
         public boolean isFromGroup(Player player) {
-                return Arrays.asList(getPlugin().getPermission().getPlayerGroups(player)).contains(fromGroup);
+                try {
+                        return Arrays.asList(getPlugin().getPermission().getPlayerGroups(player)).contains(fromGroup);
+                } catch (UnsupportedOperationException uoe) {
+                        return false;
+                }
         }
 }
