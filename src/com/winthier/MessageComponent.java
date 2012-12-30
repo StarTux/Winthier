@@ -101,6 +101,7 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 if (tokens.length == 0) return false;
                 MessageNode node = root;
                 for (String token : tokens) {
+                        if (node.overridePermission != null && sender.hasPermission(node.overridePermission)) return false;
                         MessageNode nextNode = node.subNodes.get(token.toLowerCase());
                         if (nextNode == null) {
                                 if (node == root) return false;
