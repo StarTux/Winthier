@@ -74,6 +74,9 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 if (aliases != null) {
                         node.aliases = aliases;
                 }
+                if (conf.getBoolean("Terminal")) {
+                        node.terminal = true;
+                }
                 for (String key : conf.getKeys(false)) {
                         if (!Character.isUpperCase(key.charAt(0))) {
                                 MessageNode newNode = new MessageNode(node);
@@ -101,20 +104,25 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 if (tokens.length == 0) return false;
                 MessageNode node = root;
                 for (String token : tokens) {
-                        if (node.overridePermission != null && sender.hasPermission(node.overridePermission)) return false;
                         MessageNode nextNode = node.subNodes.get(token.toLowerCase());
                         if (nextNode == null) {
                                 if (node == root) return false;
-                                sender.sendMessage(getErrorMessage(node));
+                                if (node.terminal && node.message != null) {
+                                        for (String line : node.message) sender.sendMessage(line);
+                                } else {
+                                        sender.sendMessage(getErrorMessage(node));
+                                }
                                 return true;
                         }
                         node = nextNode;
+                        if (node.overridePermission != null && sender.hasPermission(node.overridePermission)) return false;
+                        if (node.permission != null && !sender.hasPermission(node.permission)) {
+                                sender.sendMessage("" + ChatColor.RED + "You don't have permission");
+                                return true;
+                        }
                 }
-                if (node.overridePermission != null && sender.hasPermission(node.overridePermission)) return false;
                 if (node.message == null) {
                         sender.sendMessage(getErrorMessage(node));
-                } else if (node.permission != null && !sender.hasPermission(node.permission)) {
-                        sender.sendMessage("" + ChatColor.RED + "You don't have permission");
                 } else {
                         for (String line : node.message) sender.sendMessage(line);
                 }
@@ -146,6 +154,7 @@ class MessageNode {
         public String permission = null;
         public String overridePermission = null;
         public MessageNode() {}
+        public boolean terminal;
         public MessageNode(MessageNode parent) {
                 this.parent = parent;
         }
