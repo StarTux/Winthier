@@ -81,11 +81,6 @@ public class NewbieWatchComponent extends AbstractComponent implements Listener 
         public void onBlockBreak(BlockBreakEvent event) {
                 Integer count = blockBreakCount.get(event.getPlayer().getName());
                 if (count == null) return;
-                if (count + 1 > maxBlockBreaks) {
-                        blockBreakCount.remove(event.getPlayer().getName());
-                        return;
-                }
-                blockBreakCount.put(event.getPlayer().getName(), count + 1);
                 if (blockBreaks.contains(event.getBlock().getType())) {
                         blockBreakMessage.setVariable("player", event.getPlayer().getName());
                         String blockName = event.getBlock().getType().name();
@@ -100,6 +95,12 @@ public class NewbieWatchComponent extends AbstractComponent implements Listener 
                                         blockBreakMessage.sendTo(player);
                                 }
                         }
+                } else {
+                        if (count + 1 > maxBlockBreaks) {
+                                blockBreakCount.remove(event.getPlayer().getName());
+                                return;
+                        }
+                        blockBreakCount.put(event.getPlayer().getName(), count + 1);
                 }
         }
 }
