@@ -33,6 +33,14 @@ commands:
     description: Turn wither spawning on or off
     usage: /<command>
     permission: winthier.cmd.wither
+  mail:
+    description: Read mails
+    usage: /<command>
+    permission: winthier.mail
+  mailto:
+    description: Write mails
+    usage: /<command> <recipient> <message>
+    permission: winthier.mailto
 permissions:
   winthier.cmd.pw:
     description: Use the /pw command to become a member
@@ -108,4 +116,10 @@ permissions:
     default: op
   winthier.cmd.wither:
     description: Use the /wither command
+    default: op
+  winthier.mail:
+    description: Read mail
+    default: op
+  winthier.mailto:
+    description: Write mail
     default: op
