@@ -44,7 +44,7 @@ public class MailComponent extends AbstractComponent implements CommandExecutor,
         private static final String filename = "mails.yml";
 
         public MailComponent(WinthierPlugin plugin) {
-                super(plugin, "message");
+                super(plugin, "mail");
         }
 
         @Override
