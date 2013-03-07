@@ -44,3 +44,5 @@ components:
     BlockBreakMessage: '&4New player &c{player}&4 broke &c{block}'
   wither:
     regions: []
+  party:
+    MessageFormat: '&7(party {party})&b{sender}&7: &f{message}'

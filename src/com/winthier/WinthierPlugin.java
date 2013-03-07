@@ -56,6 +56,7 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                 components.add(new NoVoidDeathComponent(this));
                 components.add(new ExactSpawnComponent(this));
                 components.add(new MailComponent(this));
+                components.add(new PartyComponent(this));
                 for (Component component : components) {
                         component.enable();
                         component.loadConfiguration();

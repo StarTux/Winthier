@@ -41,6 +41,14 @@ commands:
     description: Write mails
     usage: /<command> <recipient> <message>
     permission: winthier.mailto
+  party: 
+    description: Party chat interface
+    usage: /<command> [partyname]
+    permission: winthier.party
+  p:
+    description: Speak in party chat
+    usage: /<command> <message>
+    permission: winthier.party
 permissions:
   winthier.cmd.pw:
     description: Use the /pw command to become a member
@@ -122,4 +130,7 @@ permissions:
     default: op
   winthier.mailto:
     description: Write mail
+    default: op
+  winthier.party:
+    description: Use party chat
     default: op
