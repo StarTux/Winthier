@@ -42,6 +42,9 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
 
         public PlayerMessagesComponent(WinthierPlugin plugin) {
                 super(plugin, "playermessages");
+        }
+
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
@@ -75,7 +78,7 @@ public class PlayerMessagesComponent extends AbstractComponent implements Listen
 
         @EventHandler(priority = EventPriority.LOWEST)
         public void onPlayerQuit(PlayerQuitEvent event) {
-                        event.setQuitMessage("");
+                event.setQuitMessage("");
                 if (event.getPlayer().hasPermission("winthier.playermessages.leave")) {
                         variables.setVariable("player", event.getPlayer().getName());
                         IgnoreComponent.getInstance().broadcast(event.getPlayer(), ColorStringFilter.build(leaveMsg), true);
