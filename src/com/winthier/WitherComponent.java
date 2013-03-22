@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
@@ -38,7 +37,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-public class WitherComponent extends AbstractComponent implements CommandExecutor, Listener {
+public class WitherComponent extends AbstractComponent implements Listener {
         private Map<String, Set<String>> regions = new LinkedHashMap<String, Set<String>>();
         private WorldGuardPlugin worldGuard;
         
@@ -47,8 +46,7 @@ public class WitherComponent extends AbstractComponent implements CommandExecuto
         }
 
         @Override
-        public void enable() {
-                getPlugin().getCommand("wither").setExecutor(this);
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
                 worldGuard = (WorldGuardPlugin)getPlugin().getServer().getPluginManager().getPlugin("WorldGuard");
         }
@@ -71,8 +69,8 @@ public class WitherComponent extends AbstractComponent implements CommandExecuto
                 }
         }
 
-        @Override
-        public boolean onCommand(CommandSender sender, Command command, String token, String args[]) {
+        @CommandHandler(description = "Confiure wither spawning in WorldGuard regions", usage = "/<command> <subcommand> ...", permission = "winthier.wither", permissionDefault = "op")
+        public boolean wither(CommandSender sender, Command command, String token, String args[]) {
                 if (args.length == 0) {
                         sender.sendMessage("Subcommands: list, addregion, removeregion");
                         return true;

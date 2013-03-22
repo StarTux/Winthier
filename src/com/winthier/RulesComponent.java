@@ -23,11 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class RulesComponent extends AbstractComponent implements CommandExecutor {
+public class RulesComponent extends AbstractComponent {
         private List<String> rules = new ArrayList<String>();
         private Random rnd = new Random(System.currentTimeMillis());
         private String passwordLine;
@@ -37,8 +36,7 @@ public class RulesComponent extends AbstractComponent implements CommandExecutor
         }
 
         @Override
-        public void enable() {
-                getPlugin().getCommand("rules").setExecutor(this);
+        public void onEnable() {
         }
 
         @Override
@@ -57,8 +55,8 @@ public class RulesComponent extends AbstractComponent implements CommandExecutor
                 return filter.replace(passwordLine);
         }
 
-        @Override
-        public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
+        @CommandHandler(permission = "winthier.rules", permissionDefault = "true", description = "Read the rules", usage = "/<command>")
+        public boolean rules(CommandSender sender, Command command, String token, String[] args) {
                 if (args.length != 0) return false;
                 if (sender instanceof Player) {
                         Player player = (Player)sender;

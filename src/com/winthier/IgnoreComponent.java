@@ -35,7 +35,6 @@ import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -45,7 +44,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-public class IgnoreComponent extends AbstractComponent implements CommandExecutor, Listener {
+public class IgnoreComponent extends AbstractComponent implements Listener {
         private static IgnoreComponent instance;
         private Map<String, Set<String>> ignoreLists = Collections.synchronizedMap(new LinkedHashMap<String, Set<String>>());
         private Set<String> muteList = Collections.synchronizedSet(new HashSet<String>());
@@ -56,97 +55,98 @@ public class IgnoreComponent extends AbstractComponent implements CommandExecuto
         }
 
         @Override
-        public void enable() {
-                getPlugin().getCommand("ignore").setExecutor(this);
-                getPlugin().getCommand("mute").setExecutor(this);
-                getPlugin().getCommand("unmute").setExecutor(this);
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
-        @Override
-        public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
-                if (token.equals("ignore")) {
-                        if (!(sender instanceof Player)) {
-                                sender.sendMessage(ChatColor.RED + "Player expected!");
+        @CommandHandler(description = "Ignore another player in chat", permission = "winthier.ignore", permissionDefault = "false")
+        public boolean ignore(CommandSender sender, Command command, String label, String[] args) {
+                if (!(sender instanceof Player)) {
+                        sender.sendMessage(ChatColor.RED + "Player expected!");
+                        return true;
+                }
+                Player ignorer = (Player)sender;
+                if (args.length == 0) {
+                        Set<String> ignorees = getIgnoreList(ignorer.getName());
+                        if (ignorees.size() == 0) {
+                                sender.sendMessage("You are not ignoring anyone.");
+                        } else {
+                                StringBuilder sb = new StringBuilder("Ignored players:");
+                                for (String ignoree : ignorees) sb.append(" ").append(ignoree);
+                                sender.sendMessage(sb.toString());
+                        }
+                        return true;
+                }
+                if (args.length == 1) {
+                        String ignoree = getPlayer(args[0], ignorer.getName());
+                        if (ignoree == null) {
+                                sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
                                 return true;
                         }
-                        Player ignorer = (Player)sender;
-                        if (args.length == 0) {
-                                Set<String> ignorees = getIgnoreList(ignorer.getName());
-                                if (ignorees.size() == 0) {
-                                        sender.sendMessage("You are not ignoring anyone.");
-                                } else {
-                                        StringBuilder sb = new StringBuilder("Ignored players:");
-                                        for (String ignoree : ignorees) sb.append(" ").append(ignoree);
-                                        sender.sendMessage(sb.toString());
-                                }
-                                return true;
-                        }
-                        if (args.length == 1) {
-                                String ignoree = getPlayer(args[0], ignorer.getName());
+                        boolean ignore = toggleIgnore(ignorer.getName(), ignoree);
+                        sender.sendMessage((ignore ? "Ignoring " : "No longer ignoring ") + ignoree);
+                } else {
+                        for (String arg : args) {
+                                String ignoree = getPlayer(arg, ignorer.getName());
                                 if (ignoree == null) {
-                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
-                                        return true;
+                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + arg);
+                                } else {
+                                        setIgnore(ignorer.getName(), ignoree, true);
+                                        sender.sendMessage("Ignoring " + ignoree);
                                 }
-                                boolean ignore = toggleIgnore(ignorer.getName(), ignoree);
-                                sender.sendMessage((ignore ? "Ignoring " : "No longer ignoring ") + ignoree);
+                        }
+                }
+                return true;
+        }
+
+        @CommandHandler(description = "Mute a player", permission = "winthier.mute", permissionDefault = "op")
+        public boolean mute(CommandSender sender, Command command, String label, String[] args) {
+                if (args.length == 0) {
+                        // list muted players
+                        if (muteList.isEmpty()) {
+                                sender.sendMessage("No players muted");
                         } else {
-                                for (String arg : args) {
-                                        String ignoree = getPlayer(arg, ignorer.getName());
-                                        if (ignoree == null) {
-                                                sender.sendMessage("" + ChatColor.RED + "Player not found: " + arg);
-                                        } else {
-                                                setIgnore(ignorer.getName(), ignoree, true);
-                                                sender.sendMessage("Ignoring " + ignoree);
-                                        }
+                                StringBuilder sb = new StringBuilder("Muted players:");
+                                synchronized(muteList) {
+                                        for (String name : muteList) sb.append(" ").append(name);
+                                }
+                                sender.sendMessage(sb.toString());
+                        }
+                } else if (args.length == 1) {
+                        // mute a player
+                        String mutee = getPlayer(args[0]);
+                        if (mutee == null) {
+                                sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
+                        } else {
+                                if (muteList.contains(mutee)) {
+                                        muteList.remove(mutee);
+                                        sender.sendMessage(mutee + " has been unmuted");
+                                } else {
+                                        muteList.add(mutee);
+                                        sender.sendMessage(mutee + " is now muted");
+                                }
+                        }
+                } else {
+                        return false;
+                }
+                return true;
+        }
+
+        @CommandHandler(description = "Unmute a player", usage = "/<command> <player>", permission = "winthier.mute", permissionDefault = "op")
+        public boolean unmute(CommandSender sender, Command command, String label, String[] args) {
+                if (args.length == 1) {
+                        String mutee = getPlayer(args[0]);
+                        if (mutee == null) {
+                                sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
+                        } else {
+                                if (muteList.contains(mutee)) {
+                                        muteList.remove(mutee);
+                                        sender.sendMessage(mutee + " has been unmuted");
+                                } else {
+                                        sender.sendMessage("" + ChatColor.RED + mutee + " is not muted");
                                 }
                         }
                         return true;
-                } else if (token.equals("mute")) {
-                        if (args.length == 0) {
-                                // list muted players
-                                if (muteList.isEmpty()) {
-                                        sender.sendMessage("No players muted");
-                                } else {
-                                        StringBuilder sb = new StringBuilder("Muted players:");
-                                        synchronized(muteList) {
-                                                for (String name : muteList) sb.append(" ").append(name);
-                                        }
-                                        sender.sendMessage(sb.toString());
-                                }
-                        } else if (args.length == 1) {
-                                // mute a player
-                                String mutee = getPlayer(args[0]);
-                                if (mutee == null) {
-                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
-                                } else {
-                                        if (muteList.contains(mutee)) {
-                                                muteList.remove(mutee);
-                                                sender.sendMessage(mutee + " has been unmuted");
-                                        } else {
-                                                muteList.add(mutee);
-                                                sender.sendMessage(mutee + " is now muted");
-                                        }
-                                }
-                        } else {
-                                return false;
-                        }
-                        return true;
-                } else if (token.equals("unmute")) {
-                        if (args.length == 1) {
-                                String mutee = getPlayer(args[0]);
-                                if (mutee == null) {
-                                        sender.sendMessage("" + ChatColor.RED + "Player not found: " + args[0]);
-                                } else {
-                                        if (muteList.contains(mutee)) {
-                                                muteList.remove(mutee);
-                                                sender.sendMessage(mutee + " has been unmuted");
-                                        } else {
-                                                sender.sendMessage("" + ChatColor.RED + mutee + " is not muted");
-                                        }
-                                }
-                                return true;
-                        }
                 }
                 return false;
         }

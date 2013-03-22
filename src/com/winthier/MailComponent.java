@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -39,7 +38,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-public class MailComponent extends AbstractComponent implements CommandExecutor, Listener  {
+public class MailComponent extends AbstractComponent implements Listener  {
         private Map<String, LinkedList<Mail>> mails = new HashMap<String, LinkedList<Mail>>();
         private static final String filename = "mails.yml";
 
@@ -48,15 +47,13 @@ public class MailComponent extends AbstractComponent implements CommandExecutor,
         }
 
         @Override
-        public void enable() {
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
-                getPlugin().getCommand("mail").setExecutor(this);
-                getPlugin().getCommand("mailto").setExecutor(this);
                 load();
         }
 
         @Override
-        public void disable() {
+        public void onDisable() {
                 save();
         }
 
@@ -65,52 +62,59 @@ public class MailComponent extends AbstractComponent implements CommandExecutor,
         }
 
         @Override
-        public boolean onCommand(CommandSender sender, Command command, String alias, String args[]) {
-                if (alias.equalsIgnoreCase("mail")) {
-                        if (args.length == 0) {
-                                LinkedList<Mail> list = getMailsFor(sender.getName());
-                                if (list == null) {
-                                        sendMessage(sender, "&cNo mail for you.");
-                                        return true;
-                                }
-                                Mail mail = list.removeFirst();
-                                sender.sendMessage("");
-                                sendMessage(sender, "&7Mail from &b" + mail.sender + "&7:");
-                                sender.sendMessage(mail.message);
-                                if (list.isEmpty()) {
-                                        sendMessage(sender, "&7No more mail.");
-                                } else if (list.size() == 1) {
-                                        sendMessage(sender, "&71 more mail.");
-                                } else {
-                                        sendMessage(sender, "&7" + list.size() + " more mails.");
-                                }
-                        } else {
-                                return false;
+        public void saveConfiguration() {
+                save();
+        }
+
+        @CommandHandler(aliases = { "mail" }, description = "Read mails", usage = "/<command>", permission = "winthier.mail", permissionDefault = "op")
+        public boolean readMail(CommandSender sender, Command command, String alias, String args[]) {
+                if (args.length == 0) {
+                        LinkedList<Mail> list = getMailsFor(sender.getName());
+                        if (list == null) {
+                                sendMessage(sender, "&cNo mail for you.");
+                                return true;
                         }
-                } else if (alias.equalsIgnoreCase("mailto")) {
-                        if (args.length > 1) {
-                                String recipient = args[0];
-                                StringBuilder sb = new StringBuilder(args[1]);
-                                for (int i = 2; i < args.length; ++i) sb.append(" ").append(args[i]);
-                                String message = sb.toString();
-                                addMail(new Mail(sender.getName(), recipient, message));
-                                sendMessage(sender, "&3Mail sent to " + recipient);
-                                Player player = getPlugin().getServer().getPlayer(recipient);
-                                if (player != null) {
-                                        sendMessage(player, "&7You have mail. Type &b/mail&7.");
-                                }
+                        Mail mail = list.removeFirst();
+                        sender.sendMessage("");
+                        sendMessage(sender, "&7Mail from &b" + mail.sender + "&7:");
+                        sender.sendMessage(mail.message);
+                        if (list.isEmpty()) {
+                                sendMessage(sender, "&7No more mail.");
+                        } else if (list.size() == 1) {
+                                sendMessage(sender, "&71 more mail.");
                         } else {
-                                return false;
+                                sendMessage(sender, "&7" + list.size() + " more mails.");
                         }
+                        return true;
+                } else {
+                        return false;
                 }
-                return true;
+        }
+
+        @CommandHandler(description = "Write mails", usage = "/<command> <recipient> <message>", permission = "winthier.mailto", permissionDefault = "op")
+        public boolean mailto(CommandSender sender, Command command, String alias, String args[]) {
+                if (args.length > 1) {
+                        String recipient = args[0];
+                        StringBuilder sb = new StringBuilder(args[1]);
+                        for (int i = 2; i < args.length; ++i) sb.append(" ").append(args[i]);
+                        String message = sb.toString();
+                        addMail(new Mail(sender.getName(), recipient, message));
+                        sendMessage(sender, "&3Mail sent to " + recipient);
+                        Player player = getPlugin().getServer().getPlayer(recipient);
+                        if (player != null) {
+                                sendMessage(player, "&7You have mail. Type &b/readmail&7.");
+                        }
+                        return true;
+                } else {
+                        return false;
+                }
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
         public void onPlayerJoin(PlayerJoinEvent event) {
                 List<Mail> list = getMailsFor(event.getPlayer().getName());
                 if (list != null && !list.isEmpty()) {
-                        sendMessage(event.getPlayer(), "&7You have mail. Type &b/mail&7.");
+                        sendMessage(event.getPlayer(), "&7You have mail. Type &b/readmail&7.");
                 }
         }
 

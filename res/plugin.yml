@@ -5,65 +5,13 @@ author: StarTux
 description: The Winthier Plugin
 depend: [ Vault, WorldEdit, WorldGuard ]
 commands:
-  pw:
-    description: Become a member
-    usage: /<command> <password>
-    permission: winthier.cmd.pw
   winthier:
     description: General purpose command
     usage: /<command> help
-    permission: winthier.cmd.winthier
-  rules:
-    description: Display server rules
-    usage: /<command>
-    permission: winthier.cmd.rules
-  ignore:
-    description: Ignore another player in chat
-    usage: /<command> <player>
-    permission: winthier.cmd.ignore
-  mute:
-    description: Mute a player
-    usage: /<command> <player>
-    permission: winthier.cmd.mute
-  unmute:
-    description: Unmute a player
-    usage: /<command> <player>
-    permission: winthier.cmd.mute
-  wither:
-    description: Turn wither spawning on or off
-    usage: /<command>
-    permission: winthier.cmd.wither
-  mail:
-    description: Read mails
-    usage: /<command>
-    permission: winthier.mail
-  mailto:
-    description: Write mails
-    usage: /<command> <recipient> <message>
-    permission: winthier.mailto
-  party: 
-    description: Party chat interface
-    usage: /<command> [partyname]
-    permission: winthier.party
-  p:
-    description: Speak in party chat
-    usage: /<command> <message>
-    permission: winthier.party
+    permission: winthier.winthier
 permissions:
-  winthier.cmd.pw:
-    description: Use the /pw command to become a member
-    default: false
-  winthier.cmd.wintier:
+  winthier.wintier:
     description: Use the /winthier command
-    default: op
-  winthier.cmd.rules:
-    description: Use the /rules command
-    default: op
-  winthier.cmd.ignore:
-    description: Use the /ignore command
-    default: false
-  winthier.cmd.mute:
-    description: Use the /mute command
     default: op
   winthier.chat.pm:
     description: Send private messages via /msg, /tell, /reply or /r.
@@ -121,16 +69,4 @@ permissions:
     - winthier.signcolor.r
   winthier.newbiewatch.notify:
     description: Get notified when a newbie breaks a watched block
-    default: op
-  winthier.cmd.wither:
-    description: Use the /wither command
-    default: op
-  winthier.mail:
-    description: Read mail
-    default: op
-  winthier.mailto:
-    description: Write mail
-    default: op
-  winthier.party:
-    description: Use party chat
     default: op

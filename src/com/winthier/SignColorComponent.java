@@ -30,12 +30,12 @@ public class SignColorComponent extends AbstractComponent implements Listener {
         }
 
         @Override
-        public void enable() {
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
         @Override
-        public void disable() {}
+        public void onDisable() {}
 
         @Override
         public void loadConfiguration() {

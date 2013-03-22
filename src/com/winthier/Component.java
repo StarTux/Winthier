@@ -45,4 +45,7 @@ public interface Component {
          * before the config.yml is saved to disk.
          */
         public void saveConfiguration();
+
+        public String getName();
+        public boolean isEnabled();
 }

@@ -24,6 +24,7 @@ import org.bukkit.configuration.ConfigurationSection;
 public abstract class AbstractComponent implements Component {
         private WinthierPlugin plugin;
         private String name;
+        private boolean enabled;
 
         public AbstractComponent(WinthierPlugin plugin, String name) {
                 this.plugin = plugin;
@@ -31,10 +32,28 @@ public abstract class AbstractComponent implements Component {
         }
 
         @Override
-        public void enable() {}
+        public final void enable() {
+                if (!enabled) {
+                        onEnable();
+                        enabled = true;
+                        loadConfiguration();
+                        WinthierCommand.registerCommands(this);
+                        plugin.getLogger().info("[" + name + "] enabled");
+                }
+        }
 
         @Override
-        public void disable() {}
+        public final void disable() {
+                if (enabled) {
+                        saveConfiguration();
+                        onDisable();
+                        enabled = false;
+                        plugin.getLogger().info("[" + name + "] disabled");
+                }
+        }
+
+        public void onEnable() {}
+        public void onDisable() {}
 
         @Override
         public void loadConfiguration() {}
@@ -55,7 +74,13 @@ public abstract class AbstractComponent implements Component {
                 return plugin.getConfig().getConfigurationSection("components." + name);
         }
 
+        @Override
         public String getName() {
                 return name;
+        }
+
+        @Override
+        public boolean isEnabled() {
+                return enabled;
         }
 }

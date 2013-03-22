@@ -19,12 +19,15 @@
 
 package com.winthier;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,40 +39,44 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class WinthierPlugin extends JavaPlugin implements Listener {
         private Permission permission = null;
-        private Set<Component> components = new LinkedHashSet<Component>();
+        private Map<String, Component> components = new HashMap<String, Component>();
+        private Set<String> enabledComponents = new LinkedHashSet<String>();
+        private Set<String> disabledComponents = new LinkedHashSet<String>();
 
         @Override
         public void onEnable() {
                 getServer().getPluginManager().registerEvents(this, this);
                 setupPermissions();
-                components.add(new NoClientModsComponent(this));
-                components.add(new PasswordComponent(this));
-                components.add(new RulesComponent(this));
-                components.add(new MotdComponent(this));
-                components.add(new SignColorComponent(this));
-                components.add(new MessageComponent(this));
-                components.add(new IgnoreComponent(this));
-                components.add(new PlayerMessagesComponent(this));
-                components.add(new ChatComponent(this));
-                components.add(new NewbieWatchComponent(this));
-                components.add(new WitherComponent(this));
-                components.add(new NoVoidDeathComponent(this));
-                components.add(new ExactSpawnComponent(this));
-                components.add(new MailComponent(this));
-                components.add(new PartyComponent(this));
-                for (Component component : components) {
-                        component.enable();
-                        component.loadConfiguration();
+                Component tmp[] = {
+                        new NoClientModsComponent(this),
+                        new PasswordComponent(this),
+                        new RulesComponent(this),
+                        new MotdComponent(this),
+                        new SignColorComponent(this),
+                        new MessageComponent(this),
+                        new IgnoreComponent(this),
+                        new PlayerMessagesComponent(this),
+                        new ChatComponent(this),
+                        new NewbieWatchComponent(this),
+                        new WitherComponent(this),
+                        new NoVoidDeathComponent(this),
+                        new ExactSpawnComponent(this),
+                        new MailComponent(this),
+                        new PartyComponent(this)
+                };
+                for (Component component : tmp) {
+                        components.put(component.getName(), component);
                 }
+                getConfig().options().copyDefaults(true);
+                loadConfiguration();
+                saveConfiguration();
         }
 
         public void onDisable() {
-                for (Component component : components) {
-                        component.saveConfiguration();
+                saveConfiguration();
+                for (Component component : components.values()) {
                         component.disable();
                 }
-                getConfig().options().copyDefaults(true);
-                saveConfig();
         }
 
         private boolean setupPermissions()
@@ -87,24 +94,70 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
+                if (!token.equalsIgnoreCase("winthier")) {
+                        sender.sendMessage("Unknown command. Type \"help\" for help.");
+                        return true;
+                }
                 if (args.length == 1 && args[0].equals("devnull")) return true;
                 if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
                         reloadConfig();
-                        for (Component component : components) {
-                                component.reloadConfiguration();
-                        }
+                        reloadConfiguration();
+                        saveConfiguration();
                         sender.sendMessage("Configuration reloaded");
                         return true;
                 }
                 if (args.length == 1 && args[0].equalsIgnoreCase("save")) {
-                        for (Component component : components) {
-                                component.saveConfiguration();
-                        }
-                        getConfig().options().copyDefaults(true);
-                        saveConfig();
+                        saveConfiguration();
                         sender.sendMessage("Configuration saved");
                         return true;
                 }
                 return false;
+        }
+
+        private final void reloadConfiguration() {
+                loadConfiguration();
+                for (Component component : components.values()) {
+                        if (component.isEnabled()) component.reloadConfiguration();
+                }
+        }
+
+        private final void loadConfiguration() {
+                enabledComponents.clear();
+                disabledComponents.clear();
+                enabledComponents.addAll(getConfig().getStringList("enabled"));
+                disabledComponents.addAll(getConfig().getStringList("disabled"));
+                // remove duplicates and zombies from enabledComponents
+                for (Iterator<String> iter = enabledComponents.iterator(); iter.hasNext();) {
+                        String enabled = iter.next();
+                        if (disabledComponents.contains(enabled) || !components.keySet().contains(enabled)) iter.remove();
+                }
+                // remove zombies from disabledComponents
+                for (Iterator<String> iter = disabledComponents.iterator(); iter.hasNext();) {
+                        String disabled = iter.next();
+                        if (!components.keySet().contains(disabled)) iter.remove();
+                }
+                // add components to disabledComponents by default
+                for (String name : components.keySet()) {
+                        if (!enabledComponents.contains(name) && !disabledComponents.contains(name)) {
+                                disabledComponents.add(name);
+                        }
+                }
+                for (String enabled : enabledComponents) {
+                        Component component = components.get(enabled);
+                        component.enable();
+                }
+                for (String disabled : disabledComponents) {
+                        Component component = components.get(disabled);
+                        component.disable();
+                }
+        }
+
+        private final void saveConfiguration() {
+                for (Component component : components.values()) {
+                        if (component.isEnabled()) component.saveConfiguration();
+                }
+                getConfig().set("enabled", new ArrayList<String>(enabledComponents));
+                getConfig().set("disabled", new ArrayList<String>(disabledComponents));
+                saveConfig();
         }
 }

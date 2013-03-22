@@ -35,7 +35,7 @@ public class NoVoidDeathComponent extends AbstractComponent implements Listener 
                 super(plugin, "novoiddeath");
         }
 
-        public void enable() {
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 

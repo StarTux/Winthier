@@ -39,7 +39,7 @@ public class MotdComponent extends AbstractComponent implements Listener {
         }
 
         @Override
-        public void enable() {
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 

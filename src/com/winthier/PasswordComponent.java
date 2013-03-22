@@ -23,11 +23,10 @@ import java.util.Arrays;
 import java.util.Random;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class PasswordComponent extends AbstractComponent implements CommandExecutor {
+public class PasswordComponent extends AbstractComponent {
         private String fromGroup, toGroup;
         private int passwordLength;
         private static PasswordComponent instance;
@@ -45,8 +44,7 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
         }
 
         @Override
-        public void enable() {
-                getPlugin().getCommand("pw").setExecutor(this);
+        public void onEnable() {
         }
 
         @Override
@@ -58,8 +56,15 @@ public class PasswordComponent extends AbstractComponent implements CommandExecu
                 announcementMessage = new VariableStringFilter().parseMessage(getConfig().getString("messages.Announcement"));
         }
 
-        @Override
-        public boolean onCommand(CommandSender sender, Command command, String token, String[] args) {
+        @CommandHandler(aliases = { "pwof" }, description = "See the password of another player", permission = "winthier.pwof", permissionDefault = "op", usage="/<command> <player>")
+        public boolean passwordOf(CommandSender sender, Command command, String token, String[] args) {
+                if (args.length != 1) return false;
+                sender.sendMessage("Password for " + args[0] + ": " + getPassword(args[0]));
+                return true;
+        }
+
+        @CommandHandler(aliases = { "pw" }, description = "Become a member", permission = "winthier.cmd", permissionDefault = "true", usage="/<command> <password>")
+        public boolean password(CommandSender sender, Command command, String token, String[] args) {
                 if (args.length != 1) return false;
                 if (!(sender instanceof Player)) {
                         sender.sendMessage(ChatColor.RED + "Player expected!");

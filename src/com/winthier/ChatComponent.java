@@ -45,6 +45,10 @@ public class ChatComponent extends AbstractComponent implements Listener {
 
         public ChatComponent(WinthierPlugin plugin) {
                 super(plugin, "chat");
+        }
+
+        @Override
+        public void onEnable() {
                 getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
