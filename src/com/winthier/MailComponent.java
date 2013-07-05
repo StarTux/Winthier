@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -37,6 +38,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class MailComponent extends AbstractComponent implements Listener  {
         private Map<String, LinkedList<Mail>> mails = new HashMap<String, LinkedList<Mail>>();
@@ -58,7 +60,7 @@ public class MailComponent extends AbstractComponent implements Listener  {
         }
 
         private static final void sendMessage(CommandSender sender, String message) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                sender.sendMessage(message);
         }
 
         @Override
@@ -66,24 +68,28 @@ public class MailComponent extends AbstractComponent implements Listener  {
                 save();
         }
 
+        private String getMessage(String msg) {
+                return ChatColor.translateAlternateColorCodes('&', getConfig().getString("messages." + msg));
+        }
+
         @CommandHandler(aliases = { "mail" }, description = "Read mails", usage = "/<command>", permission = "winthier.mail", permissionDefault = "op")
         public boolean readMail(CommandSender sender, Command command, String alias, String args[]) {
                 if (args.length == 0) {
                         LinkedList<Mail> list = getMailsFor(sender.getName());
                         if (list == null) {
-                                sendMessage(sender, "&cNo mail for you.");
+                                sendMessage(sender, getMessage("MailboxEmpty"));
                                 return true;
                         }
                         Mail mail = list.removeFirst();
                         sender.sendMessage("");
-                        sendMessage(sender, "&7Mail from &b" + mail.sender + "&7:");
-                        sender.sendMessage(mail.message);
+                        sendMessage(sender, getMessage("MailHeader").replaceAll(Pattern.quote("{from}"), mail.sender).replaceAll(Pattern.quote("{to}"), mail.recipient));
+                        sender.sendMessage(getMessage("MailMessage").replaceAll(Pattern.quote("{message}"), mail.message));
                         if (list.isEmpty()) {
-                                sendMessage(sender, "&7No more mail.");
+                                sendMessage(sender, getMessage("NoMoreMail"));
                         } else if (list.size() == 1) {
-                                sendMessage(sender, "&71 more mail.");
+                                sendMessage(sender, getMessage("OneMoreMail"));
                         } else {
-                                sendMessage(sender, "&7" + list.size() + " more mails.");
+                                sendMessage(sender, getMessage("XMoreMails").replaceAll(Pattern.quote("{amount}"), "" + list.size()));
                         }
                         return true;
                 } else {
@@ -99,10 +105,10 @@ public class MailComponent extends AbstractComponent implements Listener  {
                         for (int i = 2; i < args.length; ++i) sb.append(" ").append(args[i]);
                         String message = sb.toString();
                         addMail(new Mail(sender.getName(), recipient, message));
-                        sendMessage(sender, "&3Mail sent to " + recipient);
+                        sendMessage(sender, getMessage("MailSent").replaceAll(Pattern.quote("{to}"), recipient));
                         Player player = getPlugin().getServer().getPlayer(recipient);
                         if (player != null) {
-                                sendMessage(player, "&7You have mail. Type &b/readmail&7.");
+                                sendMessage(player, getMessage("YouHaveMail"));
                         }
                         return true;
                 } else {
@@ -112,9 +118,14 @@ public class MailComponent extends AbstractComponent implements Listener  {
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
         public void onPlayerJoin(PlayerJoinEvent event) {
-                List<Mail> list = getMailsFor(event.getPlayer().getName());
+                final Player player = event.getPlayer();
+                List<Mail> list = getMailsFor(player.getName());
                 if (list != null && !list.isEmpty()) {
-                        sendMessage(event.getPlayer(), "&7You have mail. Type &b/readmail&7.");
+                        new BukkitRunnable() {
+                                public void run() {
+                                        sendMessage(player, getMessage("YouHaveMail"));
+                                }
+                        }.runTaskLater(getPlugin(), getConfig().getInt("LoginDelay") * 20L);
                 }
         }
 

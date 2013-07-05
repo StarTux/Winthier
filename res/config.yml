@@ -48,3 +48,14 @@ components:
     regions: []
   party:
     MessageFormat: '&7(party {party})&b{sender}&7: &f{message}'
+  mail:
+    LoginDelay: 3
+    messages:
+      YouHaveMail: '&7You have mail. Type &b/readmail&7.'
+      MailboxEmpty: '&cNo mail for you.'
+      NoMoreMail: '&7No more mail.'
+      OneMoreMail: '&7One more mail.'
+      XMoreMails: '&7{amount} meore mails.'
+      MailSent: '&3Mail sent to {to}.'
+      MailHeader: '&7Mail from &b{from}&7:'
+      MailMessage: '&f{message}'

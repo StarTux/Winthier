@@ -19,17 +19,21 @@
 
 package com.winthier;
 
+import com.onarandombox.MultiverseCore.MultiverseCore;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.plugin.Plugin;
 
 public class MessageComponent extends AbstractComponent implements Listener {
         private MessageNode root = new MessageNode();
@@ -76,6 +80,21 @@ public class MessageComponent extends AbstractComponent implements Listener {
                 }
                 if (conf.getBoolean("Terminal")) {
                         node.terminal = true;
+                }
+                String anchor = conf.getString("Anchor");
+                if (anchor != null) {
+                        Plugin p = getPlugin().getServer().getPluginManager().getPlugin("Multiverse-Core");
+                        if (p == null) {
+                                getPlugin().getLogger().warning("Multiverse-Core not found");
+                        } else if (p instanceof MultiverseCore) {
+                                MultiverseCore mvcore = (MultiverseCore)p;
+                                Location loc = mvcore.getAnchorManager().getAnchorLocation(anchor);
+                                if (loc == null) {
+                                        getPlugin().getLogger().warning("Anchor not found: " + anchor);
+                                } else {
+                                        node.anchor = loc;
+                                }
+                        }
                 }
                 for (String key : conf.getKeys(false)) {
                         if (!Character.isUpperCase(key.charAt(0))) {
@@ -125,6 +144,12 @@ public class MessageComponent extends AbstractComponent implements Listener {
                         sender.sendMessage(getErrorMessage(node));
                 } else {
                         for (String line : node.message) sender.sendMessage(line);
+                        if (node.anchor != null) {
+                                if (sender instanceof Player) {
+                                        Player player = (Player)sender;
+                                        player.teleport(node.anchor);
+                                }
+                        }
                 }
                 return true;
         }
@@ -155,6 +180,7 @@ class MessageNode {
         public String overridePermission = null;
         public MessageNode() {}
         public boolean terminal;
+        public Location anchor;
         public MessageNode(MessageNode parent) {
                 this.parent = parent;
         }

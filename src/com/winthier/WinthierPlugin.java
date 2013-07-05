@@ -62,18 +62,17 @@ public class WinthierPlugin extends JavaPlugin implements Listener {
                         new NoVoidDeathComponent(this),
                         new ExactSpawnComponent(this),
                         new MailComponent(this),
-                        new PartyComponent(this)
+                        new PartyComponent(this),
+                        new StarveComponent(this)
                 };
                 for (Component component : tmp) {
                         components.put(component.getName(), component);
                 }
                 getConfig().options().copyDefaults(true);
                 loadConfiguration();
-                saveConfiguration();
         }
 
         public void onDisable() {
-                saveConfiguration();
                 for (Component component : components.values()) {
                         component.disable();
                 }
