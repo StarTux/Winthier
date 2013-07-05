@@ -22,17 +22,28 @@ package com.winthier;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
-public class PartyComponent extends AbstractComponent {
+public class PartyComponent extends AbstractComponent implements Listener {
         private Map<String, String> parties = new HashMap<String, String>();
+        private Map<Player, String> invites = new HashMap<Player, String>();
+        private Set<Player> focussed = Collections.synchronizedSet(new HashSet<Player>());
         private VariableMessage messageFormat;
 
         public PartyComponent(WinthierPlugin plugin) {
@@ -42,6 +53,7 @@ public class PartyComponent extends AbstractComponent {
         @Override
         public void onEnable() {
                 load();
+                getPlugin().getServer().getPluginManager().registerEvents(this, getPlugin());
         }
 
         @Override
@@ -74,6 +86,45 @@ public class PartyComponent extends AbstractComponent {
                 return result;
         }
 
+        public void joinParty(Player player, String partyName) {
+                String oldParty = parties.get(player.getName());
+                if (oldParty != null) {
+                        for (Player other : getPartyPlayers(oldParty)) {
+                                if (!other.equals(player)) {
+                                        sendMessage(other, "&7" + player.getName() + " left party &b" + oldParty + "&7.");
+                                }
+                        }
+                }
+                if (partyName == null) {
+                        parties.remove(player.getName());
+                        focussed.remove(player);
+                        sendMessage(player, "&7You left the party.");
+                        return;
+                }
+                parties.put(player.getName(), partyName);
+                sendMessage(player, "&7You joined party &b" + partyName + "&7.");
+                for (Player other : getPartyPlayers(partyName)) {
+                        if (other.equals(player)) continue;
+                        sendMessage(other, "&7" + player.getName() + " joined party &b" + partyName + "&7.");
+                }
+        }
+
+        public void speakParty(Player player, String message) {
+                String partyName = parties.get(player.getName());
+                if (partyName == null) {
+                        sendMessage(player, "&cYou are not in a party");
+                        return;
+                }
+                messageFormat.setVariable("party", partyName);
+                messageFormat.setVariable("sender", player.getName());
+                messageFormat.setVariable("message", message);
+                String msg = messageFormat.toString();
+                for (Player other : getPartyPlayers(partyName)) {
+                        other.sendMessage(msg);
+                }
+                getPlugin().getLogger().info("[Party] [" + partyName + "] " + player.getName() + ": " + msg);
+        }
+
         @CommandHandler(description = "Join or create a party", usage = "/<command> [partyname]", permission = "winthier.party", permissionDefault = "op")
         public boolean party(CommandSender sender, Command command, String alias, String args[]) {
                 if (!(sender instanceof Player)) {
@@ -91,28 +142,39 @@ public class PartyComponent extends AbstractComponent {
                                 }
                                 sendMessage(sender, sb.toString());
                         }
+                } else if (args.length == 1 && args[0].equals("accept")) {
+                        Player player = (Player)sender;
+                        String partyName = invites.get(player);
+                        if (partyName == null) {
+                                sendMessage(sender, "&cNo one invited you.");
+                                return true;
+                        }
+                        joinParty(player, partyName);
+                } else if (args.length == 1 && (args[0].equals("q") || args[0].equals("quit"))) {
+                        if (parties.get(sender.getName()) == null) {
+                                sendMessage(sender, "&cYou are not in a party.");
+                                return true;
+                        }
+                        Player player = (Player)sender;
+                        joinParty(player, null);
                 } else if (args.length == 1) {
-                        String party = args[0];
-                        String oldParty = parties.get(sender.getName());
-                        if (oldParty != null) {
-                                for (Player player : getPartyPlayers(oldParty)) {
-                                        if (!player.equals(sender)) {
-                                                sendMessage(player, "&7" + sender.getName() + " left party &b" + oldParty + "&7.");
-                                        }
-                                }
+                        Player player = (Player)sender;
+                        final String partyName = args[0];
+                        joinParty(player, partyName);
+                } else if (args.length == 2 && args[0].equals("invite")) {
+                        String partyName = parties.get(sender.getName());
+                        if (partyName == null) {
+                                sendMessage(sender, "&cYou must be in a party to invite someone.");
+                                return true;
                         }
-                        if (party.equals("q")) {
-                                parties.remove(sender.getName());
-                                sendMessage(sender, "&7You left the party.");
-                        } else {
-                                parties.put(sender.getName(), party);
-                                sendMessage(sender, "&7You joined party &b" + party + "&7.");
-                                for (Player player : getPartyPlayers(party)) {
-                                        if (!player.equals(sender)) {
-                                                sendMessage(player, "&7" + sender.getName() + " joined party &b" + party + "&7.");
-                                        }
-                                }
+                        Player invitee = getPlugin().getServer().getPlayer(args[1]);
+                        if (invitee == null) {
+                                sendMessage(sender, "&cPlayer not found: " + args[1]);
+                                return true;
                         }
+                        invites.put(invitee, partyName);
+                        sendMessage(sender, "&7Invited " + invitee.getName() + " to party " + partyName);
+                        sendMessage(invitee, "&7" + sender.getName() + " has invited you to the party " + partyName + ". To accept, type &e/party accept&7.");
                 } else {
                         return false;
                 }
@@ -125,29 +187,53 @@ public class PartyComponent extends AbstractComponent {
                         sender.sendMessage("Player expected!");
                         return true;
                 }
-                if (args.length > 0) {
-                        String party = parties.get(sender.getName());
-                        if (party == null) {
-                                sendMessage(sender, "&cYou are not in a party.");
+                Player player = (Player)sender;
+                if (args.length == 0) {
+                        String partyName = parties.get(player.getName());
+                        if (partyName == null) {
+                                sendMessage(player, "&cYou are not in a party to focus.");
+                                focussed.remove(player);
                                 return true;
                         }
+                        if (focussed.contains(player)) {
+                                focussed.remove(player);
+                                sendMessage(player, "&7You no longer focus party " + partyName + ".");
+                                return true;
+                        } else {
+                                focussed.add(player);
+                                sendMessage(player, "&7Now focussing party " + partyName + ".");
+                                return true;
+                        }
+                } else {
                         StringBuilder sb = new StringBuilder(args[0]);
                         for (int i = 1; i < args.length; ++i) {
                                 sb.append(" ").append(args[i]);
                         }
-                        messageFormat.setVariable("party", party);
-                        messageFormat.setVariable("sender", sender.getName());
-                        messageFormat.setVariable("message", sb.toString());
-                        String msg = messageFormat.toString();
-                        for (Player player : getPartyPlayers(party)) {
-                                player.sendMessage(msg);
-                        }
-                        getPlugin().getLogger().info("[Party] [" + party + "] " + sender.getName() + ": " + sb.toString());
+                        speakParty(player, sb.toString());
                         return true;
-                } else {
-                        return false;
                 }
         }
+
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+        public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+                final Player player = event.getPlayer();
+                if (!focussed.contains(player)) return;
+                event.setCancelled(true);
+                final String msg = event.getMessage();
+                new BukkitRunnable() {
+                        public void run() {
+                                speakParty(player, msg);
+                        }
+                }.runTask(getPlugin());
+        }
+
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+        public void onPlayerQuit(PlayerQuitEvent event) {
+                invites.remove(event.getPlayer());
+                focussed.remove(event.getPlayer());
+        }
+
+        // configuration routines
 
         private File getSaveFile() {
                 File file = getPlugin().getDataFolder();
