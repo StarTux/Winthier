@@ -139,7 +139,7 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 for (Player other : getPartyPlayers(partyName)) {
                         other.sendMessage(msg);
                 }
-                getPlugin().getLogger().info("[Party] [" + partyName + "] " + player.getName() + ": " + msg);
+                getPlugin().getLogger().info("[Party] [" + partyName + "] " + player.getName() + ": " + message);
         }
 
         @CommandHandler(description = "Join or create a party", usage = "/<command> [partyname]", permission = "winthier.party", permissionDefault = "op")
