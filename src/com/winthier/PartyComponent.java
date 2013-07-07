@@ -109,10 +109,27 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 }
         }
 
+        public void focusParty(Player player, boolean focus) {
+                String partyName = parties.get(player.getName());
+                if (focus && partyName == null) {
+                        sendMessage(player, "&cYou are not in a party to focus.");
+                        focussed.remove(player);
+                        return;
+                }
+                if (focus) {
+                        focussed.add(player);
+                        sendMessage(player, "&7Now focussing party " + partyName + ".");
+                } else {
+                        focussed.remove(player);
+                        sendMessage(player, "&7No longer focussing party chat.");
+                }
+        }
+
         public void speakParty(Player player, String message) {
                 String partyName = parties.get(player.getName());
                 if (partyName == null) {
                         sendMessage(player, "&cYou are not in a party");
+                        focussed.remove(player); // should never happen
                         return;
                 }
                 messageFormat.setVariable("party", partyName);
@@ -142,6 +159,14 @@ public class PartyComponent extends AbstractComponent implements Listener {
                                 }
                                 sendMessage(sender, sb.toString());
                         }
+                } else if (args.length == 1 && args[0].equals("focus")) {
+                        Player player = (Player)sender;
+                        focusParty(player, true);
+                        return true;
+                } else if (args.length == 1 && args[0].equals("unfocus")) {
+                        Player player = (Player)sender;
+                        focusParty(player, false);
+                        return true;
                 } else if (args.length == 1 && args[0].equals("accept")) {
                         Player player = (Player)sender;
                         String partyName = invites.get(player);
@@ -157,11 +182,11 @@ public class PartyComponent extends AbstractComponent implements Listener {
                         }
                         Player player = (Player)sender;
                         joinParty(player, null);
-                } else if (args.length == 1) {
-                        Player player = (Player)sender;
-                        final String partyName = args[0];
-                        joinParty(player, partyName);
-                } else if (args.length == 2 && args[0].equals("invite")) {
+                } else if (args.length >= 1 && args[0].equals("invite")) {
+                        if (args.length == 1 || args.length > 2) {
+                                sendMessage(sender, "&fUsage: &e/party &6invite <player>");
+                                return true;
+                        }
                         String partyName = parties.get(sender.getName());
                         if (partyName == null) {
                                 sendMessage(sender, "&cYou must be in a party to invite someone.");
@@ -175,6 +200,10 @@ public class PartyComponent extends AbstractComponent implements Listener {
                         invites.put(invitee, partyName);
                         sendMessage(sender, "&7Invited " + invitee.getName() + " to party " + partyName);
                         sendMessage(invitee, "&7" + sender.getName() + " has invited you to the party " + partyName + ". To accept, type &e/party accept&7.");
+                } else if (args.length == 1) {
+                        Player player = (Player)sender;
+                        final String partyName = args[0];
+                        joinParty(player, partyName);
                 } else {
                         return false;
                 }
@@ -189,21 +218,12 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 }
                 Player player = (Player)sender;
                 if (args.length == 0) {
-                        String partyName = parties.get(player.getName());
-                        if (partyName == null) {
-                                sendMessage(player, "&cYou are not in a party to focus.");
-                                focussed.remove(player);
-                                return true;
-                        }
                         if (focussed.contains(player)) {
-                                focussed.remove(player);
-                                sendMessage(player, "&7You no longer focus party " + partyName + ".");
-                                return true;
+                                focusParty(player, false);
                         } else {
-                                focussed.add(player);
-                                sendMessage(player, "&7Now focussing party " + partyName + ".");
-                                return true;
+                                focusParty(player, true);
                         }
+                        return true;
                 } else {
                         StringBuilder sb = new StringBuilder(args[0]);
                         for (int i = 1; i < args.length; ++i) {
