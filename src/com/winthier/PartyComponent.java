@@ -43,7 +43,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class PartyComponent extends AbstractComponent implements Listener {
         private Map<String, String> parties = new HashMap<String, String>();
         private Map<Player, String> invites = new HashMap<Player, String>();
-        private Set<Player> focussed = Collections.synchronizedSet(new HashSet<Player>());
+        private Set<Player> focused = Collections.synchronizedSet(new HashSet<Player>());
         private VariableMessage messageFormat;
 
         public PartyComponent(WinthierPlugin plugin) {
@@ -97,7 +97,7 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 }
                 if (partyName == null) {
                         parties.remove(player.getName());
-                        focussed.remove(player);
+                        focused.remove(player);
                         sendMessage(player, "&7You left the party.");
                         return;
                 }
@@ -113,15 +113,15 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 String partyName = parties.get(player.getName());
                 if (focus && partyName == null) {
                         sendMessage(player, "&cYou are not in a party to focus.");
-                        focussed.remove(player);
+                        focused.remove(player);
                         return;
                 }
                 if (focus) {
-                        focussed.add(player);
-                        sendMessage(player, "&7Now focussing party " + partyName + ".");
+                        focused.add(player);
+                        sendMessage(player, "&7Now focusing party " + partyName + ".");
                 } else {
-                        focussed.remove(player);
-                        sendMessage(player, "&7No longer focussing party chat.");
+                        focused.remove(player);
+                        sendMessage(player, "&7No longer focusing party chat.");
                 }
         }
 
@@ -129,7 +129,7 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 String partyName = parties.get(player.getName());
                 if (partyName == null) {
                         sendMessage(player, "&cYou are not in a party");
-                        focussed.remove(player); // should never happen
+                        focused.remove(player); // should never happen
                         return;
                 }
                 messageFormat.setVariable("party", partyName);
@@ -218,7 +218,7 @@ public class PartyComponent extends AbstractComponent implements Listener {
                 }
                 Player player = (Player)sender;
                 if (args.length == 0) {
-                        if (focussed.contains(player)) {
+                        if (focused.contains(player)) {
                                 focusParty(player, false);
                         } else {
                                 focusParty(player, true);
@@ -237,7 +237,7 @@ public class PartyComponent extends AbstractComponent implements Listener {
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
         public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
                 final Player player = event.getPlayer();
-                if (!focussed.contains(player)) return;
+                if (!focused.contains(player)) return;
                 event.setCancelled(true);
                 final String msg = event.getMessage();
                 new BukkitRunnable() {
@@ -250,7 +250,7 @@ public class PartyComponent extends AbstractComponent implements Listener {
         @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
         public void onPlayerQuit(PlayerQuitEvent event) {
                 invites.remove(event.getPlayer());
-                focussed.remove(event.getPlayer());
+                focused.remove(event.getPlayer());
         }
 
         // configuration routines
